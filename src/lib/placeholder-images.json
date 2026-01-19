@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "A modern office setting with professionals collaborating.",
+      "imageUrl": "https://images.unsplash.com/photo-1655745653127-4d6837baf958?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb2xsYWJvcmF0aW9uJTIwb2ZmaWNlfGVufDB8fHx8MTc2ODgyNTg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "collaboration office"
+    },
+    {
+      "id": "agent-dashboard",
+      "description": "An agent managing projects on a dashboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1654166602082-d18e7cd4bdac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkYXNoYm9hcmQlMjBwcm9qZWN0JTIwbWFuYWdlbWVudHxlbnwwfHx8fDE3Njg4MjU4NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dashboard project management"
+    },
+    {
+      "id": "contractor-dashboard",
+      "description": "A contractor reviewing RFQs on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1672862273558-0608c644a41a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsYXB0b3AlMjBmcmVlbGFuY2VyfGVufDB8fHx8MTc2ODgyNTg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop freelancer"
+    },
+    {
+      "id": "user-avatar",
+      "description": "A professional portrait of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1544168190-79c17527004f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cHJvZmVzc2lvbmFsJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4NzYwNTg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional portrait"
+    }
+  ]
+}
