@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,11 +32,14 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/hooks/use-toast';
 import { fetchEligibleRFQs } from '@/lib/contractor-api';
 import { RFQ } from '@/lib/types';
+import { enforceRateLimit } from '@/lib/rate-limit';
 
 function RFQsContent() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
@@ -46,6 +49,8 @@ function RFQsContent() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [budgetFilter, setBudgetFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     async function loadRFQs() {
@@ -67,7 +72,7 @@ function RFQsContent() {
   }, [user]);
 
   // Filter RFQs
-  const filteredRfqs = rfqs.filter((rfq) => {
+  const filteredRfqs = useMemo(() => rfqs.filter((rfq) => {
     const matchesSearch = 
       rfq.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rfq.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +82,14 @@ function RFQsContent() {
     
     // Add more filter logic as needed
     return matchesSearch && matchesStatus;
-  });
+  }), [rfqs, searchQuery, statusFilter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, industryFilter, locationFilter, statusFilter, budgetFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredRfqs.length / ITEMS_PER_PAGE));
+  const pagedRfqs = filteredRfqs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -85,6 +97,29 @@ function RFQsContent() {
     setLocationFilter('all');
     setStatusFilter('all');
     setBudgetFilter('all');
+  };
+
+  const handleSubmitIntent = (rfqId: string) => {
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Please sign in', description: 'Log in to submit a response.' });
+      return;
+    }
+
+    const rate = enforceRateLimit(`submit-rfq-${user.uid}`, 5, 60_000);
+    if (!rate.allowed) {
+      toast({
+        variant: 'destructive',
+        title: 'You are going too fast',
+        description: `Please wait ${(rate.retryAfter / 1000).toFixed(0)}s before submitting another response.`,
+      });
+      return;
+    }
+
+    toast({
+      title: 'Submission started',
+      description: 'Opening RFQ to complete your response.',
+    });
+    window.location.href = `/contractor/rfqs/${rfqId}`;
   };
 
   if (loading) {
@@ -258,7 +293,7 @@ function RFQsContent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRfqs.map((rfq) => {
+                {pagedRfqs.map((rfq) => {
                   const daysUntilDeadline = Math.ceil((new Date(rfq.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                   const isUrgent = daysUntilDeadline <= 3 && daysUntilDeadline > 0;
                   const isExpired = daysUntilDeadline < 0;
@@ -327,7 +362,7 @@ function RFQsContent() {
                             </Button>
                           </Link>
                           {rfq.status === 'published' && !isExpired && (
-                            <Button variant="default" size="sm" className="gap-2">
+                            <Button variant="default" size="sm" className="gap-2" onClick={() => handleSubmitIntent(rfq.id)}>
                               <Send className="h-4 w-4" />
                               Submit
                             </Button>
@@ -339,6 +374,30 @@ function RFQsContent() {
                 })}
               </TableBody>
             </Table>
+
+            {pageCount > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t">
+                <p className="text-sm text-gray-600">Page {currentPage} of {pageCount}</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
+                    disabled={currentPage === pageCount}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         )}
       </div>

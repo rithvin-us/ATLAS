@@ -1,33 +1,42 @@
-# Rentr - ATLAS Web Platform
+# ATLAS - Web Platform
 
-A modern Next.js web platform with AI-powered quotation validation, built with TypeScript, Tailwind CSS, and shadcn/ui components.
+AI-assisted procurement workspace for agents and contractors to manage RFQs, auctions, milestones, and invoices with clear role boundaries.
+
+## What Problem We Solve
+
+- Agents need a single place to publish RFQs/auctions, approve milestones, and process contractor invoices.
+- Contractors need visibility into RFQs/auctions and a clean flow to submit bids, milestones, and invoices without back-and-forth email.
+- AI validation (Genkit) assists feasibility checks on quotations to reduce review cycles.
 
 ## Features
 
 - 🎨 Modern UI with shadcn/ui components
 - 🤖 AI-powered quotation feasibility validation using Google Genkit
-- 📊 Dashboard for managing quotations
+- 📊 Dashboards for RFQs, auctions, milestones, and invoices (agent vs contractor views)
+- 🔐 Role-aware access guards (agent/contractor) with Firebase Auth
 - 🎯 Type-safe with TypeScript
-- 🎭 Beautiful animations and transitions
 - 📱 Fully responsive design
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **UI Components**: Radix UI + shadcn/ui
-- **AI**: Google Genkit
+- **AI**: Google Genkit (see `src/ai/` flows)
+- **Data/Auth**: Firebase (Auth + Firestore)
 - **Forms**: React Hook Form + Zod
 - **Icons**: Lucide React
 
-## Getting Started
+## How to Run
 
 ### Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
 - Google AI API key (for Genkit)
+  
+Firebase setup (Firestore + Auth) with corresponding credentials in environment variables.
 
 ### Installation
 
@@ -59,23 +68,29 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+## How the AI Works
+
+- Genkit pipelines live in `src/ai/` (e.g., `src/ai/flows/validate-quotation-feasibility.ts`).
+- The flow validates quotation feasibility using your Google GenAI key provided in `.env.local`.
+- Frontend calls the Genkit handler via the Next.js route handlers wired in `src/ai/genkit.ts` / `src/ai/dev.ts`.
+
+## Deployment
+
+- Deployment link: _not yet published; deploy your own instance once Firebase/Genkit keys are configured_.
+- Health check: `/api/health` returns `{ status: "ok" }`.
+
 ## Project Structure
 
 ```
 src/
 ├── app/                    # Next.js app router pages
-│   ├── dashboard/         # Dashboard pages
-│   │   └── quotation/    # Quotation management
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Landing page
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   └── landing-page.tsx  # Landing page component
-├── ai/                    # AI/Genkit integration
-│   ├── flows/            # AI flows
-│   └── genkit.ts         # Genkit setup
+│   ├── agent/             # Agent dashboards (invoices, rfqs, auctions)
+│   ├── contractor/        # Contractor dashboards (invoices, rfqs, auctions)
+│   └── auth/              # Auth flows for each role
+├── components/            # Shared UI (shadcn/ui) and guards
+├── ai/                    # Genkit setup and flows
 ├── hooks/                 # Custom React hooks
-└── lib/                   # Utility functions
+└── lib/                   # APIs, auth, Firebase config, utilities
 ```
 
 ## Available Scripts

@@ -1,7 +1,8 @@
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger, SidebarInset, SidebarFooter } from "@/components/ui/sidebar";
 import { AtlasLogo } from "@/components/icons/logo";
-import { LayoutDashboard, Megaphone, Settings, LogOut, Briefcase, Receipt, FileText, MessageSquare, Search, Bell } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, Briefcase, Receipt, FileText, MessageSquare, Search, Bell } from 'lucide-react';
 import Link from 'next/link';
+import { NotificationButton } from '@/components/notification-button';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -55,11 +56,6 @@ export default function DashboardLayout({
                   <Link href="#"><MessageSquare /><span>Messages</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="New Quotation Analysis">
-                  <Link href="/dashboard/quotation/new"><Megaphone /><span>AI Analysis</span></Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="mt-auto border-t border-sidebar-border p-2">
@@ -83,10 +79,7 @@ export default function DashboardLayout({
                     className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
                   />
                 </div>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Toggle notifications</span>
-                </Button>
+                <NotificationButton />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="rounded-full">

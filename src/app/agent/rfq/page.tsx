@@ -33,6 +33,7 @@ export default function AgentRFQPage() {
       setLoading(true);
       setError(null);
       try {
+        if (!user) return;
         const data = await fetchRFQs(user.uid);
         setRfqs(data);
       } catch (err: any) {
@@ -53,109 +54,158 @@ export default function AgentRFQPage() {
     });
   }, [rfqs, search, statusFilter]);
 
+  const stats = {
+    total: rfqs.length,
+    published: rfqs.filter(r => r.status === 'published').length,
+    draft: rfqs.filter(r => r.status === 'draft').length,
+    closed: rfqs.filter(r => r.status === 'closed').length,
+  };
+
   return (
     <AgentGuard>
-      <div className="flex flex-col min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container flex h-16 items-center px-4">
-            <Link href="/agent/dashboard" className="text-muted-foreground hover:text-foreground">
-              ← Dashboard
-            </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">RFQ Management</h1>
+      <div className="min-h-screen bg-gray-50">
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+              <MessageSquare className="h-10 w-10 text-blue-600" />
+              RFQ Management
+            </h1>
+            <p className="text-gray-600 text-lg">Create and manage requests for quotations</p>
           </div>
-        </header>
 
-        <main className="flex-1 container py-6 px-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search RFQs..."
-                  className="pl-10"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <Button
-                variant={statusFilter === 'all' ? 'outline' : 'default'}
-                onClick={() => setStatusFilter((prev) => (prev === 'all' ? 'published' : 'all'))}
-              >
-                <Filter className="mr-2 h-4 w-4" />
-                {statusFilter === 'all' ? 'Show Published' : 'Show All'}
-              </Button>
-            </div>
-            <Button asChild>
-              <Link href="/agent/rfq/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create RFQ
-              </Link>
+          {/* Stats Cards Row */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-0 hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <MessageSquare className="h-6 w-6 text-gray-600 mb-2" />
+              <p className="text-sm text-gray-600">Total RFQs</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <MessageSquare className="h-6 w-6 text-green-600 mb-2" />
+              <p className="text-sm text-gray-600">Published</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.published}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <MessageSquare className="h-6 w-6 text-yellow-600 mb-2" />
+              <p className="text-sm text-gray-600">Draft</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.draft}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <MessageSquare className="h-6 w-6 text-red-600 mb-2" />
+              <p className="text-sm text-gray-600">Closed</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.closed}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search & Filter Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              placeholder="Search RFQs by title..."
+              className="pl-10 h-12 rounded-xl border-gray-200"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <select
+            className="h-12 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 cursor-pointer"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="all">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="closed">Closed</option>
+          </select>
+          <Link href="/agent/rfq/new">
+            <Button size="lg" className="h-12">
+              <Plus className="mr-2 h-5 w-5" />
+              Create RFQ
             </Button>
+          </Link>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <Card className="mb-6 bg-red-50 border-red-200">
+            <CardContent className="p-4 flex items-center gap-3">
+              <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-red-800 text-sm">{error}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
-
-          {error && (
-            <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading RFQs...</span>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {filtered.length === 0 ? (
-                <Card>
-                  <CardContent className="py-10 text-center text-muted-foreground">
-                    {rfqs.length === 0 ? 'No RFQs yet. Create one to publish for vendors.' : 'No RFQs match your filters.'}
-                  </CardContent>
-                </Card>
-              ) : (
-                filtered.map((rfq) => (
-                  <Card key={rfq.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1 flex-1">
-                          <CardTitle>{rfq.title}</CardTitle>
-                          <div className="text-sm text-muted-foreground">
-                            Project: {rfq.projectId}
-                          </div>
-                        </div>
-                        <Badge variant={rfq.status === 'published' ? 'default' : 'secondary'}>
+        ) : filtered.length === 0 ? (
+          <Card className="border-dashed border-2 border-gray-300">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <MessageSquare className="h-12 w-12 text-gray-300 mb-4" />
+              <p className="text-gray-600 font-medium">
+                {rfqs.length === 0 ? 'No RFQs yet' : 'No RFQs match your filters'}
+              </p>
+              <p className="text-gray-500 text-sm mt-1">
+                {rfqs.length === 0 ? 'Create RFQs to request quotations from vendors' : 'Try adjusting your search or filter'}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((rfq) => (
+              <Card key={rfq.id} className="hover:shadow-lg transition-shadow border-0">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900">{rfq.title}</h3>
+                        <Badge variant={rfq.status === 'published' ? 'default' : 'secondary'} className="text-xs">
                           {rfq.status}
                         </Badge>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Deadline:</span>
-                          <span className="font-medium">{rfq.deadline ? new Date(rfq.deadline).toLocaleDateString() : 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Responses:</span>
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="h-4 w-4" />
-                            <span className="font-medium">{rfq.responses?.length || 0}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                          <Button asChild className="flex-1">
-                            <Link href={`/agent/rfq/${rfq.id}`}>View Details</Link>
-                          </Button>
-                          <Button asChild variant="outline" className="flex-1">
-                            <Link href={`/agent/auctions/new?rfqId=${rfq.id}`}>Start Auction</Link>
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          )}
+                      <p className="text-sm text-gray-600">Project: {rfq.projectId?.substring(0, 8)}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Deadline</p>
+                      <p className="text-sm font-medium text-gray-900">{rfq.deadline ? new Date(rfq.deadline).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Responses</p>
+                      <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        {rfq.responses?.length || 0}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/agent/rfq/${rfq.id}`} className="flex-1">
+                      <Button className="w-full" size="sm">View Details</Button>
+                    </Link>
+                    <Link href={`/agent/auctions/new?rfqId=${rfq.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full" size="sm">Start Auction</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
         </main>
       </div>
     </AgentGuard>

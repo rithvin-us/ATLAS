@@ -68,18 +68,19 @@ export default function RFQDetailPage() {
 
   return (
     <AgentGuard>
-      <div className="flex flex-col min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container flex h-16 items-center px-4">
-            <Link href="/agent/rfq" className="text-muted-foreground hover:text-foreground flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              RFQs
-            </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">RFQ Details</h1>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gray-50">
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          {/* Back Navigation */}
+          <Link href="/agent/rfq" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 mb-6">
+            <ArrowLeft className="h-4 w-4" />
+            Back to RFQs
+          </Link>
 
-        <main className="flex-1 container py-6 px-4">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">RFQ Details</h1>
+            <p className="text-gray-600 text-lg">View and manage quotation request</p>
+          </div>
           {error && !loading && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive mb-4">
               {error}

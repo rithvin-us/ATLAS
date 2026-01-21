@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/lib/auth-context';
+import { Chatbot } from '@/components/chatbot';
 
 export const metadata: Metadata = {
   title: 'ATLAS',
@@ -24,6 +25,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <Toaster />
+          <Chatbot />
         </AuthProvider>
       </body>
     </html>

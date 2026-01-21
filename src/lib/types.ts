@@ -39,11 +39,19 @@ export interface Vendor {
 export interface Project {
   id: string;
   name: string;
+  projectName?: string;
   agentId: string;
   contractorId?: string;
+  rfqId?: string;
   status: 'draft' | 'active' | 'in-progress' | 'completed' | 'closed';
   siteDetails: SiteDetails;
   milestones: Milestone[];
+  description?: string;
+  location?: string;
+  budget?: number;
+  startDate?: Date;
+  endDate?: Date;
+  projectType?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,9 +68,11 @@ export interface Milestone {
   id: string;
   projectId: string;
   name: string;
+  title?: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed' | 'approved';
   dueDate: Date;
+  payment?: number;
   proofDocuments: Document[];
   approvedBy?: string;
   approvedAt?: Date;
@@ -78,13 +88,17 @@ export interface RFQ {
   scopeOfWork: string;
   scope?: string;
   location?: string;
+  siteLocation?: string;
   budget?: number;
+  projectType?: string;
+  requiredSkills?: string[];
   eligibilityCriteria: string[];
   documents: Document[];
   status: 'draft' | 'published' | 'closed';
   deadline: Date;
   responses: RFQResponse[];
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface RFQResponse {
@@ -100,12 +114,8 @@ export interface RFQResponse {
 
 export interface Question {
   id: string;
-  rfqId: string;
-  contractorId: string;
-  question: string;
-  answer?: string;
-  answeredAt?: Date;
-  createdAt: Date;
+  text: string;
+  order: number;
 }
 
 // Auction types
@@ -141,11 +151,13 @@ export interface Invoice {
   amount: number;
   taxAmount: number;
   totalAmount: number;
+  description?: string;
   status: 'draft' | 'submitted' | 'approved' | 'paid' | 'disputed';
   documents: Document[];
   dueDate: Date;
   paidAt?: Date;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 // Credibility types

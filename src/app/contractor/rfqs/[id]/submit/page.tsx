@@ -21,7 +21,7 @@ import { useAuth } from '@/lib/auth-context';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { submitRFQResponse } from '@/lib/contractor-api';
-import { RFQ } from '@/lib/types';
+import { RFQ, Question } from '@/lib/types';
 
 function SubmitRFQResponseContent() {
   const { user } = useAuth();
@@ -57,14 +57,17 @@ function SubmitRFQResponseContent() {
         const data = rfqDoc.data();
         const rfq: RFQ = {
           id: rfqDoc.id,
+          projectId: data.projectId || '',
           agentId: data.agentId,
           title: data.title,
           description: data.description,
+          scopeOfWork: data.scopeOfWork || data.scope || '',
           location: data.location,
           budget: data.budget,
           deadline: data.deadline?.toDate?.() || new Date(data.deadline),
           status: data.status,
           scope: data.scope,
+          documents: data.documents || [],
           eligibilityCriteria: data.eligibilityCriteria,
           responses: data.responses || [],
           createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
@@ -78,9 +81,9 @@ function SubmitRFQResponseContent() {
           return;
         }
 
-        // Check if RFQ is open and not expired
+        // Check if RFQ is published and not expired
         const now = new Date();
-        if (rfq.status !== 'open' || new Date(rfq.deadline) < now) {
+        if (rfq.status !== 'published' || new Date(rfq.deadline) < now) {
           setError('This RFQ is no longer accepting responses');
           return;
         }
@@ -120,14 +123,18 @@ function SubmitRFQResponseContent() {
 
     try {
       setSubmitting(true);
-      await submitRFQResponse(
+      await submitRFQResponse(rfqId, {
         rfqId,
-        user.uid,
-        quotationValue,
+        contractorId: user.uid,
+        quotation: quotationValue,
         executionPlan,
-        timeline,
-        questions || undefined
-      );
+        documents: [], // Add actual documents if available
+        questions: (questions || '').split('\n').filter(q => q.trim()).map((q, i) => ({
+          id: `q_${i}`,
+          text: q.trim(),
+          order: i
+        })) as Question[]
+      });
       alert('Response submitted successfully!');
       router.push(`/contractor/rfqs/${rfqId}`);
     } catch (err: any) {
@@ -198,7 +205,7 @@ function SubmitRFQResponseContent() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      RFQ Budget: ${rfq.budget.toLocaleString()}
+                      RFQ Budget: ${(rfq.budget || 0).toLocaleString()}
                     </p>
                   </div>
 
@@ -289,7 +296,7 @@ function SubmitRFQResponseContent() {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Budget</div>
-                  <div className="font-semibold">${rfq.budget.toLocaleString()}</div>
+                  <div className="font-semibold">${(rfq.budget || 0).toLocaleString()}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Deadline</div>

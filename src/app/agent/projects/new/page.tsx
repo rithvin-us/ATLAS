@@ -89,8 +89,8 @@ export default function CreateProjectPage() {
           </div>
         </header>
 
-        <main className="flex-1 container py-6 px-4">
-          <Card className="max-w-2xl">
+        <main className="flex-1 container mx-auto px-4 py-8 flex justify-center">
+          <Card className="w-full max-w-2xl">
             <CardHeader>
               <CardTitle>New Project</CardTitle>
               <CardDescription>Create a new project to manage and track work.</CardDescription>

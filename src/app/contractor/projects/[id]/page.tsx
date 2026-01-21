@@ -55,13 +55,21 @@ function ProjectDetailContent() {
           agentId: data.agentId,
           contractorId: data.contractorId,
           rfqId: data.rfqId,
-          name: data.name,
+          name: data.name || data.projectName || 'Untitled Project',
+          projectName: data.projectName,
           description: data.description,
           location: data.location,
           budget: data.budget,
+          projectType: data.projectType,
           status: data.status,
-          startDate: data.startDate?.toDate?.() || new Date(data.startDate),
-          endDate: data.endDate?.toDate?.() || new Date(data.endDate),
+          startDate: data.startDate?.toDate?.() || (data.startDate ? new Date(data.startDate) : undefined),
+          endDate: data.endDate?.toDate?.() || (data.endDate ? new Date(data.endDate) : undefined),
+          siteDetails: data.siteDetails || {
+            name: data.name || 'Site',
+            location: data.location || 'TBD',
+            address: data.address || 'TBD',
+            description: data.description || '',
+          },
           milestones: data.milestones || [],
           createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
           updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
@@ -149,21 +157,21 @@ function ProjectDetailContent() {
                     <div className="text-sm text-muted-foreground">Budget</div>
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
-                      <span>${project.budget.toLocaleString()}</span>
+                      <span>${project.budget?.toLocaleString() || 'TBD'}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground">Start Date</div>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{new Date(project.startDate).toLocaleDateString()}</span>
+                      <span>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'TBD'}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground">End Date</div>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{new Date(project.endDate).toLocaleDateString()}</span>
+                      <span>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'TBD'}</span>
                     </div>
                   </div>
                 </div>
@@ -213,7 +221,7 @@ function ProjectDetailContent() {
                         <div className="flex items-center justify-between mt-3 pt-3 border-t">
                           <div className="text-sm">
                             <span className="text-muted-foreground">Payment: </span>
-                            <span className="font-semibold">${milestone.payment.toLocaleString()}</span>
+                            <span className="font-semibold">${milestone.payment?.toLocaleString() || '0'}</span>
                           </div>
                           <div className="text-sm">
                             <span className="text-muted-foreground">Due: </span>

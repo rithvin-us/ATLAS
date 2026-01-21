@@ -68,18 +68,19 @@ export default function InvoiceDetailPage() {
 
   return (
     <AgentGuard>
-      <div className="flex flex-col min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container flex h-16 items-center px-4">
-            <Link href="/agent/invoices" className="text-muted-foreground hover:text-foreground flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Invoices
-            </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Invoice Details</h1>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gray-50">
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          {/* Back Navigation */}
+          <Link href="/agent/invoices" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 mb-6">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Invoices
+          </Link>
 
-        <main className="flex-1 container py-6 px-4">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Invoice Details</h1>
+            <p className="text-gray-600 text-lg">Review and manage invoice status</p>
+          </div>
           {error && !loading && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive mb-4">
               {error}
@@ -134,15 +135,15 @@ export default function InvoiceDetailPage() {
                   <div className="border-t pt-4 space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium">${(invoice.amount / 100).toFixed(2)}</span>
+                      <span className="font-medium">${invoice.amount.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tax</span>
-                      <span className="font-medium">${(invoice.taxAmount / 100).toFixed(2)}</span>
+                      <span className="font-medium">${invoice.taxAmount.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold border-t pt-2">
                       <span>Total</span>
-                      <span>${(invoice.totalAmount / 100).toFixed(2)}</span>
+                      <span>${invoice.totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
 

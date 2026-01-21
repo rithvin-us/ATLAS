@@ -1,287 +1,382 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import {
-  FileText,
-  Briefcase,
-  DollarSign,
-  Award,
-  Clock,
-  CheckCircle,
-  Loader2,
-  AlertCircle,
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { 
+  TrendingUp, 
+  Clock, 
+  CheckCircle, 
+  AlertCircle, 
+  ChevronRight,
   ArrowRight,
+  FileText,
+  Hammer,
+  DollarSign,
+  Star,
+  Activity,
+  Loader2,
   Plus,
+  Briefcase,
   MessageSquare,
   AlertTriangle,
-} from 'lucide-react';
-import { useAuth } from '@/lib/auth-context';
-import {
-  fetchEligibleRFQs,
-  fetchContractorProjects,
-  fetchContractorInvoices,
-  fetchContractorCredibility,
-} from '@/lib/contractor-api';
-import { RFQ, Project, Invoice, CredibilityScore } from '@/lib/types';
+  Sparkles,
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { ContractorGuard } from "@/components/contractor/contractor-guard";
+import { useAuth } from "@/lib/auth-context";
+import { fetchEligibleRFQs, fetchContractorProjects, fetchContractorAuctions, fetchContractorInvoices } from "@/lib/contractor-api";
+import { MOCK_RFQ_RECOMMENDATIONS } from "@/lib/mock-recommendation-data";
 
 function DashboardContent() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    pendingRFQs: 0,
+    activeProjects: 0,
+    activeAuctions: 0,
+    pendingInvoices: 0,
+    credibilityScore: 85,
+  });
+  const [data, setData] = useState<any>({ rfqs: [], projects: [], auctions: [], invoices: [] });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [rfqs, setRfqs] = useState<RFQ[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [credibility, setCredibility] = useState<CredibilityScore | null>(null);
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadData() {
-      if (!user) return;
+    // Use centralized mock recommendations
+    const formattedRecommendations = MOCK_RFQ_RECOMMENDATIONS.map((rec) => ({
+      id: rec.id,
+      rfq: {
+        id: rec.id,
+        title: rec.title,
+        description: rec.description,
+        budget: rec.budget,
+        deadline: rec.deadline,
+        status: rec.status,
+      },
+      matchScore: rec.matchScore,
+      explanation: rec.explanation,
+      matchFactors: rec.matchFactors,
+    }));
 
+    setRecommendedJobs(formattedRecommendations);
+  }, []);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (!user?.uid) return;
       try {
-        setLoading(true);
-        const [rfqsData, projectsData, invoicesData, credData] = await Promise.all([
+        const [rfqs, projects, auctions, invoices] = await Promise.all([
           fetchEligibleRFQs(user.uid),
           fetchContractorProjects(user.uid),
+          fetchContractorAuctions(user.uid),
           fetchContractorInvoices(user.uid),
-          fetchContractorCredibility(user.uid),
         ]);
 
-        setRfqs(rfqsData);
-        setProjects(projectsData);
-        setInvoices(invoicesData);
-        setCredibility(credData);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-        setError('Failed to load dashboard data. Please try again.');
+        setData({ rfqs, projects, auctions, invoices });
+        setStats({
+          pendingRFQs: rfqs.length,
+          activeProjects: projects.filter((p: any) => p.status === "active" || p.status === "in-progress").length,
+          activeAuctions: auctions.filter((a: any) => a.status === "active").length,
+          pendingInvoices: invoices.filter((i: any) => i.status === "submitted" || i.status === "approved").length,
+          credibilityScore: 85,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
       } finally {
         setLoading(false);
       }
     }
-
-    loadData();
+    loadDashboardData();
   }, [user]);
+
+  const { rfqs, projects, auctions, invoices } = data;
+  const pendingInvoices = invoices.filter((i: any) => i.status === "submitted" || i.status === "approved");
+  const paidInvoices = invoices.filter((i: any) => i.status === "paid");
+  const activeProjects = projects.filter((p: any) => p.status === "in-progress" || p.status === "active");
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-          <div className="flex gap-4">
-            <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-red-900">Error Loading Dashboard</h3>
-              <p className="text-red-700 text-sm mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const activeRFQs = rfqs.filter(r => r.status === 'published');
-  const pendingInvoices = invoices.filter(i => i.status === 'submitted');
-  const approvedInvoices = invoices.filter(i => i.status === 'approved');
-  const paidInvoices = invoices.filter(i => i.status === 'paid');
-  const activeProjects = projects.filter(p => p.status === 'in-progress' || p.status === 'active');
-
-  const quickActions = [
-    { icon: FileText, label: 'Browse RFQs', href: '/contractor/rfqs', count: activeRFQs.length, color: 'blue' },
-    { icon: Briefcase, label: 'My Projects', href: '/contractor/projects', count: activeProjects.length, color: 'green' },
-    { icon: DollarSign, label: 'Create Invoice', href: '/contractor/invoices/new', color: 'purple' },
-    { icon: Award, label: 'Credibility', href: '/contractor/credibility', score: credibility?.score ?? 0, color: 'orange' },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Page Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's an overview of your procurement activities.</p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Section 1: Quick Actions */}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Hero Section */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Welcome back, {user?.email?.split("@")[0]}! 
+          </h1>
+          <p className="text-gray-600 text-lg">Here's what's happening with your opportunities</p>
+        </div>
+
+        {/* Stats Cards Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Pending RFQs */}
+          <Card className="hover:shadow-lg transition-shadow border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Pending RFQs</p>
+                  <p className="text-4xl font-bold text-gray-900">{stats.pendingRFQs}</p>
+                  <p className="text-xs text-gray-500 mt-2">Awaiting your response</p>
+                </div>
+                <div className="h-14 w-14 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                  <FileText className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Projects */}
+          <Card className="hover:shadow-lg transition-shadow border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Active Projects</p>
+                  <p className="text-4xl font-bold text-gray-900">{stats.activeProjects}</p>
+                  <p className="text-xs text-gray-500 mt-2">In progress</p>
+                </div>
+                <div className="h-14 w-14 bg-green-100 rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
+                  <TrendingUp className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Auctions */}
+          <Card className="hover:shadow-lg transition-shadow border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Active Auctions</p>
+                  <p className="text-4xl font-bold text-gray-900">{stats.activeAuctions}</p>
+                  <p className="text-xs text-gray-500 mt-2">Place your bid</p>
+                </div>
+                <div className="h-14 w-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 flex-shrink-0">
+                  <Hammer className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pending Invoices */}
+          <Card className="hover:shadow-lg transition-shadow border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Pending Invoices</p>
+                  <p className="text-4xl font-bold text-gray-900">{stats.pendingInvoices}</p>
+                  <p className="text-xs text-gray-500 mt-2">Awaiting approval</p>
+                </div>
+                <div className="h-14 w-14 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 flex-shrink-0">
+                  <DollarSign className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Credibility Score Card */}
+        <Card className="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 border-0">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Star className="h-6 w-6 text-yellow-400 fill-yellow-400" />
+                <div>
+                  <CardTitle>Your Credibility Score</CardTitle>
+                  <CardDescription>Build trust with agents and win more projects</CardDescription>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-5xl font-bold text-blue-600">{stats.credibilityScore}</p>
+                <p className="text-sm text-gray-600 mt-1">/ 100</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all"
+                  style={{ width: `${stats.credibilityScore}%` }}
+                ></div>
+              </div>
+              <Link href="/contractor/credibility">
+                <Button variant="outline" size="sm" className="whitespace-nowrap">
+                  View Details
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              const colorClasses = {
-                blue: 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100',
-                green: 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100',
-                purple: 'bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100',
-                orange: 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100',
-              };
-              const bgColor = {
-                blue: 'bg-blue-100',
-                green: 'bg-green-100',
-                purple: 'bg-purple-100',
-                orange: 'bg-orange-100',
-              };
-
-              return (
-                <Link key={action.label} href={action.href}>
-                  <Card className={`border cursor-pointer transition-all hover:shadow-md ${colorClasses[action.color as keyof typeof colorClasses]}`}>
-                    <CardContent className="p-6">
-                      <div className={`w-12 h-12 rounded-lg ${bgColor[action.color as keyof typeof bgColor]} flex items-center justify-center mb-4`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <h3 className="font-medium text-gray-900">{action.label}</h3>
-                      {'count' in action ? (
-                        <p className="text-2xl font-bold text-gray-900 mt-2">{action.count}</p>
-                      ) : (
-                        <p className="text-2xl font-bold text-gray-900 mt-2">{action.score}/100</p>
-                      )}
-                      <div className="flex items-center text-sm text-gray-600 mt-3">
-                        <span>View details</span>
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Section 2: My RFQs Overview */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">My RFQs</h2>
             <Link href="/contractor/rfqs">
-              <Button variant="outline" size="sm">
-                View All RFQs
-              </Button>
+              <div className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer h-full">
+                <FileText className="h-8 w-8 text-blue-600 mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">Browse RFQs</p>
+                <p className="text-sm text-gray-600">Find new opportunities</p>
+              </div>
+            </Link>
+
+            <Link href="/contractor/auctions">
+              <div className="p-6 border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer h-full">
+                <Hammer className="h-8 w-8 text-purple-600 mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">Place a Bid</p>
+                <p className="text-sm text-gray-600">Participate in auctions</p>
+              </div>
+            </Link>
+
+            <Link href="/contractor/invoices/new">
+              <div className="p-6 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer h-full">
+                <DollarSign className="h-8 w-8 text-green-600 mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">Create Invoice</p>
+                <p className="text-sm text-gray-600">Submit payment request</p>
+              </div>
+            </Link>
+
+            <Link href="/contractor/credibility">
+              <div className="p-6 border-2 border-gray-200 rounded-xl hover:border-amber-300 hover:bg-amber-50 transition-all cursor-pointer h-full">
+                <Star className="h-8 w-8 text-amber-600 mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">View Profile</p>
+                <p className="text-sm text-gray-600">Check your credibility</p>
+              </div>
             </Link>
           </div>
+        </div>
 
-          {rfqs.length === 0 ? (
-            <Card className="border-dashed border-2 border-gray-300">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText className="h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-600 font-medium">No RFQs available</p>
-                <p className="text-gray-500 text-sm mt-1">New RFQs will appear here as they're published</p>
-                <Link href="/contractor/rfqs">
-                  <Button className="mt-4" size="sm">
-                    Browse RFQs
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
+        {/* AI-Recommended Jobs */}
+        {recommendedJobs.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="h-6 w-6 text-purple-600" />
+              <h2 className="text-2xl font-bold text-gray-900">Recommended Jobs for You</h2>
+              <Badge variant="secondary" className="bg-purple-100 text-purple-700">AI Powered</Badge>
+            </div>
+            <p className="text-gray-600 mb-4">Based on your skills, experience, and preferences</p>
+            
             <div className="grid gap-4">
-              {rfqs.slice(0, 3).map((rfq) => (
-                <Card key={rfq.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-gray-900">{rfq.title}</h3>
-                          <Badge variant={rfq.status === 'published' ? 'default' : 'secondary'}>
-                            {rfq.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">{rfq.description?.substring(0, 100)}...</p>
-                        <div className="flex items-center gap-6 mt-4 text-sm">
-                          <span className="text-gray-600 flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {new Date(rfq.deadline).toLocaleDateString()}
-                          </span>
-                          <span className="text-gray-600">Project: {rfq.projectId.slice(0, 8)}</span>
+              {recommendedJobs.slice(0, 5).map((recommendation: any) => (
+                <Card key={recommendation.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50/30 to-transparent">
+                  <CardContent className="p-5">
+                    <Link href={`/contractor/rfqs/${recommendation.rfq.id}`}>
+                      <div className="cursor-pointer">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg text-gray-900 hover:text-purple-600 transition-colors">
+                                {recommendation.rfq.title}
+                              </h3>
+                              <Badge className="bg-purple-600">
+                                {recommendation.matchScore}% Match
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-3">{recommendation.rfq.description}</p>
+                            
+                            {/* Match Explanation */}
+                            <div className="flex items-center gap-2 mb-3 text-sm">
+                              <Sparkles className="h-4 w-4 text-purple-600" />
+                              <span className="text-purple-700 font-medium">{recommendation.explanation}</span>
+                            </div>
+
+                            {/* Match Factors */}
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {recommendation.matchFactors.skillMatch >= 70 && (
+                                <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                                  Skills: {recommendation.matchFactors.skillMatch}%
+                                </Badge>
+                              )}
+                              {recommendation.matchFactors.budgetMatch >= 70 && (
+                                <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
+                                  Budget Fit: {recommendation.matchFactors.budgetMatch}%
+                                </Badge>
+                              )}
+                              {recommendation.matchFactors.locationMatch >= 70 && (
+                                <Badge variant="outline" className="text-xs bg-orange-50 border-orange-200 text-orange-700">
+                                  Location: {recommendation.matchFactors.locationMatch}%
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                Deadline: {new Date(recommendation.rfq.deadline).toLocaleDateString()}
+                              </span>
+                              {recommendation.rfq.budget && (
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  Budget: ${recommendation.rfq.budget.toLocaleString()}
+                                </span>
+                              )}
+                              <span>Status: {recommendation.rfq.status}</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
                         </div>
                       </div>
-                      <Link href={`/contractor/rfqs/${rfq.id}`}>
-                        <Button variant="ghost" size="sm">
-                          View <ArrowRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </Link>
-                    </div>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Section 3 & 4: Invoices and Projects */}
+        {/* Two Column Section */}
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
-          {/* Invoices Overview */}
+          {/* Recent RFQs */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Invoices</h2>
-              <Link href="/contractor/invoices">
-                <Button variant="outline" size="sm">
-                  View All
+              <h2 className="text-xl font-bold text-gray-900">Recent RFQs</h2>
+              <Link href="/contractor/rfqs">
+                <Button variant="ghost" size="sm">
+                  View All <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </Link>
             </div>
-
-            {invoices.length === 0 ? (
-              <Card className="border-dashed border-2 border-gray-300">
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <DollarSign className="h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-600 font-medium text-sm">No invoices</p>
+            
+            {rfqs.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-12 w-12 text-gray-300 mb-4" />
+                  <p className="text-gray-600 font-medium">No RFQs yet</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-blue-700">Draft Invoices</p>
-                        <p className="text-2xl font-bold text-blue-900 mt-1">
-                          {invoices.filter(i => i.status === 'draft').length}
-                        </p>
-                      </div>
-                      <Plus className="h-8 w-8 text-blue-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-yellow-50 border-yellow-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-yellow-700">Pending Review</p>
-                        <p className="text-2xl font-bold text-yellow-900 mt-1">
-                          ${(pendingInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0) / 100).toLocaleString()}
-                        </p>
-                      </div>
-                      <Clock className="h-8 w-8 text-yellow-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-green-700">Paid</p>
-                        <p className="text-2xl font-bold text-green-900 mt-1">
-                          ${(paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0) / 100).toLocaleString()}
-                        </p>
-                      </div>
-                      <CheckCircle className="h-8 w-8 text-green-300" />
-                    </div>
-                  </CardContent>
-                </Card>
+                {rfqs.slice(0, 3).map((rfq: any) => (
+                  <Card key={rfq.id} className="hover:shadow-md transition-shadow border-0 bg-white">
+                    <CardContent className="p-4">
+                      <Link href={`/contractor/rfqs/${rfq.id}`}>
+                        <div className="flex items-start justify-between cursor-pointer">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">{rfq.title}</h3>
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{rfq.description}</p>
+                            <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(rfq.deadline).toLocaleDateString()}
+                              </span>
+                              <span>Status: {rfq.status}</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                        </div>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </div>
@@ -289,37 +384,41 @@ function DashboardContent() {
           {/* Active Projects */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Active Projects</h2>
+              <h2 className="text-xl font-bold text-gray-900">Active Projects</h2>
               <Link href="/contractor/projects">
-                <Button variant="outline" size="sm">
-                  View All
+                <Button variant="ghost" size="sm">
+                  View All <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </Link>
             </div>
 
             {activeProjects.length === 0 ? (
-              <Card className="border-dashed border-2 border-gray-300">
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <Briefcase className="h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-600 font-medium text-sm">No active projects</p>
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Briefcase className="h-12 w-12 text-gray-300 mb-4" />
+                  <p className="text-gray-600 font-medium">No active projects</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
-                {activeProjects.slice(0, 2).map((project) => {
-                  const completedMilestones = project.milestones?.filter(m => m.status === 'completed').length ?? 0;
-                  const totalMilestones = project.milestones?.length ?? 0;
-                  const progress = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
+                {activeProjects.slice(0, 3).map((project: any) => {
+                  const completedMilestones = project.milestones?.filter((m: any) => m.status === "completed").length ?? 0;
+                  const totalMilestones = project.milestones?.length ?? 1;
+                  const progress = Math.round((completedMilestones / totalMilestones) * 100);
 
                   return (
-                    <Card key={project.id} className="hover:shadow-md transition-shadow">
+                    <Card key={project.id} className="hover:shadow-md transition-shadow border-0 bg-white">
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-medium text-gray-900">{project.name}</h4>
-                          <Badge variant="outline">{progress}%</Badge>
-                        </div>
-                        <Progress value={progress} className="mb-2" />
-                        <p className="text-xs text-gray-600">{completedMilestones} of {totalMilestones} milestones completed</p>
+                        <Link href={`/contractor/projects/${project.id}`}>
+                          <div className="cursor-pointer">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors flex-1">{project.projectName}</h3>
+                              <Badge variant="secondary">{progress}%</Badge>
+                            </div>
+                            <Progress value={progress} className="h-2 mb-2" />
+                            <p className="text-xs text-gray-500">{completedMilestones} of {totalMilestones} milestones</p>
+                          </div>
+                        </Link>
                       </CardContent>
                     </Card>
                   );
@@ -329,110 +428,90 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Section 5: Compliance & Credibility */}
-        <div className="mb-8">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Credibility Score */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-orange-600" />
-                  Credibility Score
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {credibility ? (
-                  <div className="space-y-4">
-                    <div className="text-center py-4">
-                      <div className="text-5xl font-bold text-orange-600">{credibility.score}</div>
-                      <p className="text-sm text-gray-600 mt-1">Out of 100</p>
-                    </div>
-                    <Progress value={credibility.score} className="h-2" />
-                    <div className="grid grid-cols-2 gap-4 text-sm pt-4 border-t">
-                      <div>
-                        <p className="text-gray-600">Projects Completed</p>
-                        <p className="font-bold text-gray-900">0</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Avg. Rating</p>
-                        <p className="font-bold text-gray-900">0/5</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">No credibility score yet</p>
-                    <p className="text-sm text-gray-500 mt-1">Complete projects to build your score</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        {/* Invoice & Auction Cards */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Invoice Summary */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Invoice Summary</h2>
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="bg-blue-50 border-0">
+                <CardContent className="p-4">
+                  <FileText className="h-6 w-6 text-blue-600 mb-2" />
+                  <p className="text-2xl font-bold text-blue-900">{invoices.filter((i: any) => i.status === "draft").length}</p>
+                  <p className="text-xs text-blue-700 mt-1">Draft</p>
+                </CardContent>
+              </Card>
 
-            {/* Compliance Checklist */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  Compliance Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">GST Certificate</p>
-                      <p className="text-xs text-gray-600">Verified</p>
-                    </div>
-                  </div>
+              <Card className="bg-yellow-50 border-0">
+                <CardContent className="p-4">
+                  <Clock className="h-6 w-6 text-yellow-600 mb-2" />
+                  <p className="text-2xl font-bold text-yellow-900">{pendingInvoices.length}</p>
+                  <p className="text-xs text-yellow-700 mt-1">Pending</p>
+                </CardContent>
+              </Card>
 
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Business License</p>
-                      <p className="text-xs text-gray-600">Verified</p>
-                    </div>
-                  </div>
+              <Card className="bg-green-50 border-0">
+                <CardContent className="p-4">
+                  <CheckCircle className="h-6 w-6 text-green-600 mb-2" />
+                  <p className="text-2xl font-bold text-green-900">{paidInvoices.length}</p>
+                  <p className="text-xs text-green-700 mt-1">Paid</p>
+                </CardContent>
+              </Card>
+            </div>
+            <Link href="/contractor/invoices" className="block mt-4">
+              <Button className="w-full" variant="outline">
+                View All Invoices
+              </Button>
+            </Link>
+          </div>
 
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Insurance Certificate</p>
-                      <p className="text-xs text-gray-600">Expires in 30 days</p>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t">
-                    <Link href="/contractor/credibility">
-                      <Button variant="outline" size="sm" className="w-full">
-                        View All Documents
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Auction Summary */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Active Auctions</h2>
+            <div className="space-y-3">
+              {auctions.filter((a: any) => a.status === "active").length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <Hammer className="h-10 w-10 text-gray-300 mb-3" />
+                    <p className="text-sm text-gray-600">No active auctions</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {auctions.filter((a: any) => a.status === "active").slice(0, 2).map((auction: any) => (
+                    <Card key={auction.id} className="border-0">
+                      <CardContent className="p-4">
+                        <Link href={`/contractor/auctions/${auction.id}`}>
+                          <div className="cursor-pointer">
+                            <div className="flex items-start justify-between">
+                              <h3 className="font-semibold text-gray-900 hover:text-blue-600">Auction {auction.id.slice(0, 8)}</h3>
+                              <Badge variant="default">Active</Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">Project: {auction.projectId.slice(0, 12)}...</p>
+                          </div>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Link href="/contractor/auctions" className="block">
+                    <Button className="w-full" variant="outline">
+                      View All Auctions
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Section 6: Recent Messages */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Messages</h2>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center justify-center py-8">
-                <MessageSquare className="h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-600 font-medium">No new messages</p>
-                <p className="text-gray-500 text-sm mt-1">Check back later for RFQ clarifications and updates</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
 
 export default function ContractorDashboardPage() {
-  return <DashboardContent />;
+  return (
+    <ContractorGuard>
+      <DashboardContent />
+    </ContractorGuard>
+  );
 }

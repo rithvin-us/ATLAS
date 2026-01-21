@@ -1,189 +1,241 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
 import { AgentGuard } from '@/components/agent/agent-guard';
-import { fetchVendors } from '@/lib/agent-api';
-import { Vendor } from '@/lib/types';
 import {
-  Search,
-  Award,
-  MapPin,
+  ChevronLeft,
+  Star,
+  CheckCircle,
   Briefcase,
-  Loader2,
+  Award,
+  Clock,
+  TrendingUp,
+  Sparkles,
 } from 'lucide-react';
+import { MOCK_VENDOR_RECOMMENDATIONS } from '@/lib/mock-recommendation-data';
 
 export default function AgentVendorsPage() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [search, setSearch] = useState('');
-  const [industry, setIndustry] = useState('all');
-  const [location, setLocation] = useState('all');
-  const [minScore, setMinScore] = useState('all');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchVendors();
-        setVendors(data);
-      } catch (err: any) {
-        setError(err?.message || 'Unable to load vendors');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, []);
-
-  const filtered = useMemo(() => {
-    return vendors.filter((vendor) => {
-      const matchesSearch = vendor.name.toLowerCase().includes(search.toLowerCase());
-      const matchesIndustry = industry === 'all' || vendor.industry.toLowerCase() === industry;
-      const matchesLocation = location === 'all' || vendor.location.toLowerCase().includes(location);
-      const matchesScore = minScore === 'all' || vendor.credibilityScore >= Number(minScore);
-      return matchesSearch && matchesIndustry && matchesLocation && matchesScore;
-    });
-  }, [vendors, search, industry, location, minScore]);
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
 
   return (
     <AgentGuard>
-      <div className="flex flex-col min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container flex h-16 items-center px-4">
-            <Link href="/agent/dashboard" className="text-muted-foreground hover:text-foreground">
-              ← Dashboard
+      <div className="min-h-screen bg-gray-50">
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          {/* Header */}
+          <div className="mb-8">
+            <Link href="/agent/dashboard">
+              <Button variant="ghost" className="mb-4">
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
             </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Vendor Network</h1>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-8 w-8 text-purple-600" />
+              <h1 className="text-4xl font-bold text-gray-900">Recommended Vendors</h1>
+            </div>
+            <p className="text-gray-600 text-lg">AI-powered vendor recommendations based on your procurement history</p>
           </div>
-        </header>
 
-        <main className="flex-1 container py-6 px-4">
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search vendors..."
-                    className="pl-10"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-                <Select value={industry} onValueChange={setIndustry}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Industry" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Industries</SelectItem>
-                    <SelectItem value="hvac">HVAC</SelectItem>
-                    <SelectItem value="electrical">Electrical</SelectItem>
-                    <SelectItem value="plumbing">Plumbing</SelectItem>
-                    <SelectItem value="construction">Construction</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={location} onValueChange={setLocation}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    <SelectItem value="new york">New York</SelectItem>
-                    <SelectItem value="california">California</SelectItem>
-                    <SelectItem value="illinois">Illinois</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={minScore} onValueChange={setMinScore}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Min Score" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Any Score</SelectItem>
-                    <SelectItem value="90">90+</SelectItem>
-                    <SelectItem value="80">80+</SelectItem>
-                    <SelectItem value="70">70+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+          {selectedVendor ? (
+            // Vendor Detail View
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedVendor(null)}
+                className="mb-6"
+              >
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Back to Vendors
+              </Button>
 
-          {error && (
-            <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading vendors...</span>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filtered.length === 0 ? (
-                <Card className="md:col-span-2 lg:col-span-3">
-                  <CardContent className="py-10 text-center text-muted-foreground">
-                    {vendors.length === 0 ? 'No verified vendors found.' : 'No vendors match your filters.'}
-                  </CardContent>
-                </Card>
-              ) : (
-                filtered.map((vendor) => (
-                  <Card key={vendor.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle className="text-lg">{vendor.name}</CardTitle>
-                          <Badge variant="outline">{vendor.industry}</Badge>
+              <div className="grid gap-6">
+                {/* Vendor Header */}
+                <Card>
+                  <CardContent className="p-8">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex-1">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                          {selectedVendor.contractor.name}
+                        </h2>
+                        <div className="flex gap-2 mb-4">
+                          {selectedVendor.contractor.specialties.map((specialty: string) => (
+                            <Badge key={specialty} className="bg-blue-100 text-blue-700">
+                              {specialty}
+                            </Badge>
+                          ))}
                         </div>
-                        {vendor.verificationStatus === 'verified' && (
-                          <Badge className="bg-green-100 text-green-800">
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        {vendor.location}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Briefcase className="h-4 w-4" />
-                        {vendor.projectsCompleted} projects completed
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2">
-                          <Award className="h-5 w-5 text-yellow-600" />
-                          <div>
-                            <div className="text-sm font-medium">Credibility Score</div>
-                            <div className="text-2xl font-bold text-green-600">{vendor.credibilityScore}</div>
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                            <span>{selectedVendor.contractor.averageRating}/5.0</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span>{selectedVendor.contractor.completionRate}% completion rate</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="h-4 w-4 text-blue-600" />
+                            <span>{selectedVendor.contractor.totalProjects} projects</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button asChild className="flex-1">
-                          <Link href={`/agent/vendors/${vendor.id}`}>View Profile</Link>
-                        </Button>
-                        <Button asChild variant="outline" className="flex-1">
-                          <Link href={`/agent/rfq/new?vendorId=${vendor.id}`}>
-                            Invite to RFQ
-                          </Link>
-                        </Button>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-5xl font-bold text-purple-600 mb-2">
+                          {selectedVendor.matchScore}%
+                        </div>
+                        <Badge className="bg-purple-600">Match Score</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Vendor Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Credibility Score</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-4xl font-bold text-purple-600">
+                          {selectedVendor.contractor.credibilityScore}
+                        </div>
+                        <Progress value={selectedVendor.contractor.credibilityScore} className="h-2" />
+                        <p className="text-sm text-gray-600">Based on reliability, delivery, and quality</p>
                       </div>
                     </CardContent>
                   </Card>
-                ))
-              )}
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Experience</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-4xl font-bold text-blue-600">
+                          {selectedVendor.contractor.yearsInBusiness} years
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-gray-600" />
+                          <span className="text-sm text-gray-600">In business</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Completed {selectedVendor.contractor.totalProjects} successful projects
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Match Analysis */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Match Analysis</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <p className="text-gray-700">{selectedVendor.explanation}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {Object.entries(selectedVendor.matchFactors).map(([key, value]: [string, any]) => (
+                        <div key={key}>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700 capitalize">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                            <span className="text-sm font-bold text-purple-600">{value}%</span>
+                          </div>
+                          <Progress value={value} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Action Button */}
+                <div className="flex gap-4">
+                  <Link href={`/agent/vendors/${selectedVendor.contractor.id}`} className="flex-1">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6">
+                      View Full Profile
+                      <TrendingUp className="h-5 w-5 ml-2" />
+                    </Button>
+                  </Link>
+                  <Button variant="outline" className="flex-1 text-lg py-6">
+                    Send RFQ
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Vendor List View
+            <div className="grid gap-4">
+              {MOCK_VENDOR_RECOMMENDATIONS.map((recommendation) => (
+                <Card
+                  key={recommendation.id}
+                  className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50/30 to-transparent"
+                  onClick={() => setSelectedVendor(recommendation)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg text-gray-900 hover:text-purple-600">
+                            {recommendation.contractor.name}
+                          </h3>
+                          <Badge className="bg-purple-600">
+                            {recommendation.matchScore}% Match
+                          </Badge>
+                        </div>
+                        <div className="flex gap-2 mb-3">
+                          {recommendation.contractor.specialties.map((specialty: string) => (
+                            <Badge key={specialty} variant="outline" className="text-xs">
+                              {specialty}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        <p className="text-sm text-gray-600 mb-3">{recommendation.explanation}</p>
+
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {recommendation.matchFactors.specialtyMatch >= 70 && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+                              Specialty: {recommendation.matchFactors.specialtyMatch}%
+                            </Badge>
+                          )}
+                          {recommendation.matchFactors.reliabilityMatch >= 70 && (
+                            <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
+                              Reliability: {recommendation.matchFactors.reliabilityMatch}%
+                            </Badge>
+                          )}
+                          {recommendation.matchFactors.pricePointMatch >= 70 && (
+                            <Badge variant="outline" className="text-xs bg-orange-50 border-orange-200 text-orange-700">
+                              Price Fit: {recommendation.matchFactors.pricePointMatch}%
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                            {recommendation.contractor.averageRating}/5.0
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            {recommendation.contractor.completionRate}% Completion
+                          </span>
+                          <span className="text-purple-600 font-medium">
+                            Score: {recommendation.contractor.credibilityScore}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronLeft className="h-5 w-5 text-gray-400 flex-shrink-0 rotate-180" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </main>

@@ -38,6 +38,7 @@ export default function CreateRFQPage() {
     if (!user) return;
 
     async function loadProjects() {
+      if (!user?.uid) return;
       try {
         const data = await fetchProjects(user.uid);
         setProjects(data);
@@ -117,8 +118,8 @@ export default function CreateRFQPage() {
           </div>
         </header>
 
-        <main className="flex-1 container py-6 px-4">
-          <Card className="max-w-2xl">
+        <main className="flex-1 container mx-auto px-4 py-8 flex justify-center">
+          <Card className="w-full max-w-2xl">
             <CardHeader>
               <CardTitle>New RFQ</CardTitle>
               <CardDescription>Create a new Request for Quotation to invite vendors.</CardDescription>

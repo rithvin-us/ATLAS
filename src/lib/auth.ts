@@ -94,3 +94,45 @@ export async function getUserRole(uid: string): Promise<UserRole | null> {
     return null;
   }
 }
+
+// User profile type
+export interface UserProfile {
+  uid: string;
+  email?: string;
+  name?: string;
+  displayName?: string;
+  phone?: string;
+  role?: UserRole;
+  organizationId?: string;
+  organizationName?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
+
+// Get user profile data from Firestore
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    if (userDoc.exists()) {
+      return { uid, ...userDoc.data() } as UserProfile;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
+  }
+}
+
+// Update user profile (safe fields only)
+export async function updateUserProfile(
+  uid: string,
+  updates: { displayName?: string; phone?: string }
+) {
+  try {
+    const userRef = doc(db, 'users', uid);
+    await setDoc(userRef, updates, { merge: true });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

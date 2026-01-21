@@ -103,18 +103,17 @@ export default function AgentLayout({
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center gap-1">
+              <nav className="hidden lg:flex items-center gap-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname.startsWith(item.href);
+                  const isActive = pathname === item.href;
                   return (
                     <Link key={item.href} href={item.href}>
                       <Button
                         variant={isActive ? 'default' : 'ghost'}
                         size="sm"
-                        className="gap-2"
+                        className={isActive ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
                       >
-                        <Icon className="h-4 w-4" />
                         {item.label}
                       </Button>
                     </Link>
@@ -125,58 +124,55 @@ export default function AgentLayout({
               {/* Right Side Actions */}
               <div className="flex items-center gap-4">
                 {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5 text-gray-600" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full" />
-                </Button>
+                <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
 
                 {/* Profile Dropdown */}
                 <div className="relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="gap-2"
+                    className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-blue-600" />
                     </div>
-                    <span className="hidden sm:inline text-sm text-gray-900">{user?.email?.split('@')[0]}</span>
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
-                  </Button>
+                    <ChevronDown className="h-4 w-4 text-gray-600 hidden sm:block" />
+                  </button>
 
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                      <Link href="/agent/dashboard">
-                        <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200">
+                        <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                      </div>
+                      <Link href="/agent/profile">
+                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                           <User className="h-4 w-4" />
                           Profile
-                        </div>
+                        </button>
                       </Link>
-                      <div
-                        onClick={() => setProfileDropdownOpen(false)}
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </div>
-                      <div
+                      <Link href="/agent/settings">
+                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          Settings
+                        </button>
+                      </Link>
+                      <button
                         onClick={handleLogout}
-                        className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer flex items-center gap-2 border-t border-gray-200"
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-200"
                       >
                         <LogOut className="h-4 w-4" />
                         Logout
-                      </div>
+                      </button>
                     </div>
                   )}
                 </div>
 
                 {/* Mobile Menu Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
+                <button
+                  className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                   {mobileMenuOpen ? (
@@ -184,13 +180,13 @@ export default function AgentLayout({
                   ) : (
                     <Menu className="h-5 w-5" />
                   )}
-                </Button>
+                </button>
               </div>
             </div>
 
             {/* Mobile Navigation */}
             {mobileMenuOpen && (
-              <nav className="md:hidden pb-4 space-y-2">
+              <nav className="lg:hidden pb-4 space-y-2">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname.startsWith(item.href);

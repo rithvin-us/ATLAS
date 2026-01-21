@@ -17,14 +17,19 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, DollarSign, Loader2, AlertCircle, Upload, CheckCircle2 } from 'lucide-react';
 import { ContractorGuard } from '@/components/contractor/contractor-guard';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { fetchContractorProjects, createInvoice } from '@/lib/contractor-api';
 import { Project, Milestone, Document } from '@/lib/types';
+import { enforceRateLimit } from '@/lib/rate-limit';
+import { sendEmailNotification } from '@/lib/email-notifications';
 
 function CreateInvoiceContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,6 +42,7 @@ function CreateInvoiceContent() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [supportingDocs, setSupportingDocs] = useState<Document[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
@@ -82,7 +88,7 @@ function CreateInvoiceContent() {
 
   // Auto-fill amount when milestone is selected
   useEffect(() => {
-    if (selectedMilestone) {
+    if (selectedMilestone && selectedMilestone.payment) {
       setAmount(selectedMilestone.payment.toString());
       setTaxAmount((selectedMilestone.payment * 0.1).toFixed(2));
       setDescription(`Payment for milestone: ${selectedMilestone.title || selectedMilestone.name}`);
@@ -106,15 +112,35 @@ function CreateInvoiceContent() {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    const uploaded: Document[] = Array.from(files).map((file) => ({
-      id: `temp_${file.name}_${Date.now()}`,
-      name: file.name,
-      type: file.type || 'supporting-doc',
-      // Placeholder URL; integrate storage upload when backend is ready
-      url: 'pending-upload',
-      uploadedBy: user.uid,
-      uploadedAt: new Date(),
-    }));
+    const uploaded: Document[] = Array.from(files).map((file) => {
+      const id = `temp_${file.name}_${Date.now()}`;
+      setUploadProgress((prev) => ({ ...prev, [id]: 0 }));
+
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const current = prev[id] ?? 0;
+          const next = Math.min(current + 20, 100);
+          if (next >= 100) {
+            clearInterval(interval);
+          }
+
+          setSupportingDocs((prevDocs) =>
+            prevDocs.map((doc) => (doc.id === id && next >= 100 ? { ...doc, url: 'uploaded' } : doc))
+          );
+
+          return { ...prev, [id]: next };
+        });
+      }, 400);
+
+      return {
+        id,
+        name: file.name,
+        type: file.type || 'supporting-doc',
+        url: 'pending-upload',
+        uploadedBy: user.uid,
+        uploadedAt: new Date(),
+      };
+    });
 
     setSupportingDocs((prev) => [...prev, ...uploaded]);
     event.target.value = '';
@@ -122,28 +148,49 @@ function CreateInvoiceContent() {
 
   const handleRemoveDoc = (id: string) => {
     setSupportingDocs((prev) => prev.filter((doc) => doc.id !== id));
+    setUploadProgress((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleSubmit = async (e: FormEvent, status: 'submitted' | 'draft' = 'submitted') => {
     e.preventDefault();
     
     if (!user || !selectedProjectId || !selectedMilestoneId) {
-      alert('Please select both a project and milestone');
+      toast({
+        variant: 'destructive',
+        title: 'Missing selection',
+        description: 'Please select both a project and milestone.',
+      });
       return;
     }
 
     if (!selectedProject?.agentId) {
-      alert('Project is missing agent information. Please contact support.');
+      toast({
+        variant: 'destructive',
+        title: 'Project incomplete',
+        description: 'Project is missing agent information. Please contact support.',
+      });
       return;
     }
 
     if (!dueDate) {
-      alert('Please provide a due date');
+      toast({
+        variant: 'destructive',
+        title: 'Due date required',
+        description: 'Please provide a payment due date.',
+      });
       return;
     }
 
     if (!acknowledged && status === 'submitted') {
-      alert('Please confirm the declaration before submitting.');
+      toast({
+        variant: 'destructive',
+        title: 'Declaration required',
+        description: 'Please confirm the declaration before submitting.',
+      });
       return;
     }
 
@@ -151,17 +198,52 @@ function CreateInvoiceContent() {
     const taxValue = parseFloat(taxAmount);
 
     if (isNaN(amountValue) || amountValue <= 0) {
-      alert('Please enter a valid amount');
+      toast({
+        variant: 'destructive',
+        title: 'Invalid amount',
+        description: 'Please enter a valid amount greater than zero.',
+      });
       return;
     }
 
     if (isNaN(taxValue) || taxValue < 0) {
-      alert('Please enter a valid tax amount');
+      toast({
+        variant: 'destructive',
+        title: 'Invalid tax amount',
+        description: 'Please enter a valid tax amount.',
+      });
       return;
     }
 
     if (!description.trim()) {
-      alert('Please enter a description');
+      toast({
+        variant: 'destructive',
+        title: 'Description required',
+        description: 'Please add an invoice narrative.',
+      });
+      return;
+    }
+
+    const pendingUploads = supportingDocs.some(
+      (doc) => (uploadProgress[doc.id] ?? 100) < 100
+    );
+
+    if (pendingUploads) {
+      toast({
+        variant: 'destructive',
+        title: 'Uploads in progress',
+        description: 'Please wait for file uploads to finish.',
+      });
+      return;
+    }
+
+    const rate = enforceRateLimit(`create-invoice-${user.uid}`, 3, 60_000);
+    if (!rate.allowed) {
+      toast({
+        variant: 'destructive',
+        title: 'Too many attempts',
+        description: `Please wait a moment before trying again. Retry after ${(rate.retryAfter / 1000).toFixed(0)}s.`,
+      });
       return;
     }
 
@@ -179,11 +261,32 @@ function CreateInvoiceContent() {
         documents: supportingDocs,
         dueDate: new Date(dueDate),
       });
-      alert(status === 'draft' ? 'Draft saved successfully.' : 'Invoice submitted successfully!');
+      toast({
+        title: status === 'draft' ? 'Draft saved' : 'Invoice submitted',
+        description: status === 'draft'
+          ? 'Your draft is saved and not yet visible to the agent.'
+          : 'We will notify the agent about this invoice.',
+      });
+
+      if (status === 'submitted') {
+        void sendEmailNotification({
+          to: 'agent@placeholder.test',
+          subject: 'New invoice submitted',
+          template: 'invoice-submitted',
+          variables: {
+            project: selectedProject?.name ?? selectedProjectId,
+            amount: totalAmount.toFixed(2),
+          },
+        });
+      }
       router.push(`/contractor/invoices/${invoiceId}`);
     } catch (err: any) {
       console.error('Failed to create invoice:', err);
-      alert(err.message || 'Failed to create invoice. Please try again.');
+      toast({
+        variant: 'destructive',
+        title: 'Failed to create invoice',
+        description: err.message || 'Please try again.',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -292,7 +395,7 @@ function CreateInvoiceContent() {
                         {availableMilestones.length > 0 ? (
                           availableMilestones.map((milestone) => (
                             <SelectItem key={milestone.id} value={milestone.id}>
-                              {milestone.title || milestone.name} - ${milestone.payment.toLocaleString()}
+                              {milestone.title || milestone.name} - ${milestone.payment?.toLocaleString() || '0'}
                             </SelectItem>
                           ))
                         ) : (
@@ -397,9 +500,15 @@ function CreateInvoiceContent() {
                       <div className="space-y-2">
                         {supportingDocs.map((doc) => (
                           <div key={doc.id} className="flex items-center justify-between rounded-md bg-background px-3 py-2 border">
-                            <div>
+                            <div className="flex-1 pr-3">
                               <p className="text-sm font-medium">{doc.name}</p>
-                              <p className="text-xs text-muted-foreground">{doc.type || 'document'}</p>
+                              <p className="text-xs text-muted-foreground mb-2">{doc.type || 'document'}</p>
+                              <div className="space-y-1">
+                                <Progress value={uploadProgress[doc.id] ?? 100} />
+                                <p className="text-xs text-muted-foreground">
+                                  {uploadProgress[doc.id] && uploadProgress[doc.id] < 100 ? 'Uploading…' : 'Uploaded'}
+                                </p>
+                              </div>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => handleRemoveDoc(doc.id)}>Remove</Button>
                           </div>
@@ -420,7 +529,7 @@ function CreateInvoiceContent() {
                   {selectedMilestone ? (
                     <>
                       <div className="flex justify-between"><span className="text-muted-foreground">Title</span><span className="font-medium">{selectedMilestone.title || selectedMilestone.name}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="font-medium">${selectedMilestone.payment.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="font-medium">${selectedMilestone.payment?.toLocaleString() || '0'}</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-medium capitalize">{selectedMilestone.status}</span></div>
                       <div className="text-muted-foreground text-xs">Ensure acceptance evidence is attached before submitting.</div>
                     </>

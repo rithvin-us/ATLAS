@@ -57,6 +57,7 @@ function InvoiceDetailContent() {
           totalAmount: data.totalAmount,
           description: data.description,
           status: data.status,
+          documents: data.documents || [],
           dueDate: data.dueDate?.toDate?.() || new Date(data.dueDate),
           createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
           updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
@@ -197,19 +198,19 @@ function InvoiceDetailContent() {
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="text-lg font-semibold">
-                      ${(invoice.amount / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${invoice.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Tax</span>
                     <span className="text-lg font-semibold">
-                      ${(invoice.taxAmount / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${invoice.taxAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="border-t pt-3 flex items-center justify-between">
                     <span className="text-lg font-semibold">Total Amount</span>
                     <span className="text-2xl font-bold text-green-600">
-                      ${(invoice.totalAmount / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ${invoice.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>

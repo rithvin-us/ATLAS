@@ -118,7 +118,7 @@ export default function ContractorLayout({
                       <Button
                         variant={isActive ? 'default' : 'ghost'}
                         size="sm"
-                        className={isActive ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-gray-100'}
+                        className={isActive ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
                       >
                         {item.label}
                       </Button>

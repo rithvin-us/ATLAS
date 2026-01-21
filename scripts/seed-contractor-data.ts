@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, Timestamp } from 'firebase/firestore';
 
 // Firebase config - update with your credentials
 const firebaseConfig = {

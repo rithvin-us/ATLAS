@@ -38,9 +38,12 @@ import {
   XCircle,
   Eye,
   RefreshCw,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { AgentGuard } from '@/components/agent/agent-guard';
 import { useAuth } from '@/lib/auth-context';
+import { MOCK_CONTRACTOR_APPLICATIONS, computeContractorFitScore, MOCK_RFQ_RECOMMENDATIONS } from '@/lib/mock-recommendation-data';
 import { doc, getDoc, updateDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Auction, Bid } from '@/lib/types';
@@ -57,6 +60,7 @@ function AuctionDetailContent() {
   const [bids, setBids] = useState<Bid[]>([]);
   const [updating, setUpdating] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [recommendedContractors, setRecommendedContractors] = useState<any[]>([]);
 
   // Real-time auction updates
   useEffect(() => {
@@ -126,6 +130,27 @@ function AuctionDetailContent() {
         });
         setBids(fetchedBids);
         setLastRefresh(new Date());
+
+        // Compute recommended contractors based on auction budget
+        if (fetchedBids.length > 0) {
+          const mockRfq = MOCK_RFQ_RECOMMENDATIONS[0]; // Use first RFQ as base budget
+          const applicationsForAuction = MOCK_CONTRACTOR_APPLICATIONS.map((app) => {
+            const { fitScore, explanation, factors } = computeContractorFitScore(app, mockRfq.budget);
+            return {
+              ...app,
+              fitScore,
+              explanation,
+              factors,
+            };
+          });
+
+          // Sort by fit score and take top 3
+          const topContractors = applicationsForAuction
+            .sort((a, b) => b.fitScore - a.fitScore)
+            .slice(0, 3);
+
+          setRecommendedContractors(topContractors);
+        }
       },
       (err) => {
         console.error('Failed to load bids:', err);
@@ -238,18 +263,18 @@ function AuctionDetailContent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container flex h-16 items-center px-4">
-          <Link href="/agent/auctions" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
+    <div className="min-h-screen bg-gray-50">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
+          <Link href="/agent/auctions" className="inline-flex items-center gap-2 mb-4 text-blue-600 hover:text-blue-700">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Auctions
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Auction Management</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Auction Management</h1>
+          <p className="text-gray-600 text-lg mt-2">Manage bids and select top contractors</p>
         </div>
-      </header>
 
-      <main className="flex-1 container py-6 px-4">
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="space-y-6">
           {/* Auction Overview */}
           <Card>
             <CardHeader>
@@ -319,6 +344,89 @@ function AuctionDetailContent() {
               </div>
             </CardContent>
           </Card>
+
+          {/* AI-Recommended Contractors */}
+          {recommendedContractors.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-green-600" />
+                  <CardTitle>AI-Recommended Contractors</CardTitle>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">AI Ranked</Badge>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">Top candidates for this auction ranked by fit score</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {recommendedContractors.map((recommendation: any, index: number) => (
+                    <Card
+                      key={recommendation.id}
+                      className="border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/30 to-transparent hover:shadow-md transition-shadow"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="flex-shrink-0">
+                                <div className="flex items-center justify-center h-7 w-7 rounded-full bg-green-100 text-green-600 font-bold text-xs">
+                                  #{index + 1}
+                                </div>
+                              </div>
+                              <h4 className="font-semibold text-gray-900">
+                                {recommendation.contractor.name}
+                              </h4>
+                              <Badge className="bg-green-600">
+                                {recommendation.fitScore}% Fit
+                              </Badge>
+                            </div>
+
+                            <p className="text-sm text-green-700 font-medium mb-3">
+                              ✓ {recommendation.explanation}
+                            </p>
+
+                            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Credibility</div>
+                                <div className="text-sm font-bold text-purple-600">{recommendation.factors.credibility}%</div>
+                              </div>
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Bid Fit</div>
+                                <div className="text-sm font-bold text-blue-600">{recommendation.factors.bidCompetitiveness}%</div>
+                              </div>
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Delivery</div>
+                                <div className="text-sm font-bold text-green-600">{recommendation.factors.deliveryHistory}%</div>
+                              </div>
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Skills</div>
+                                <div className="text-sm font-bold text-yellow-600">{recommendation.factors.skillMatch}%</div>
+                              </div>
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Compliance</div>
+                                <div className="text-sm font-bold text-emerald-600">{recommendation.factors.compliance}%</div>
+                              </div>
+                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
+                                <div className="text-xs text-gray-600">Experience</div>
+                                <div className="text-sm font-bold text-indigo-600">{recommendation.factors.pastPerformance}%</div>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-gray-600">
+                              <span className="mr-4">💼 {recommendation.contractor.totalProjects} projects</span>
+                              <span className="mr-4">📅 {recommendation.contractor.yearsInBusiness} years</span>
+                              <span className="mr-4">⏱️ {recommendation.deliveryHistory.onTimePercentage}% on-time</span>
+                              <span>⭐ {recommendation.contractor.averageRating}/5.0</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Contractor Bids Received */}
           <Card>

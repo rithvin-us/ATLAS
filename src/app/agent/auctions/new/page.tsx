@@ -38,6 +38,7 @@ export default function CreateAuctionPage() {
     if (!user) return;
 
     async function loadData() {
+      if (!user?.uid) return;
       try {
         const [rfqData, projectData] = await Promise.all([
           fetchRFQs(user.uid),
@@ -130,8 +131,8 @@ export default function CreateAuctionPage() {
           </div>
         </header>
 
-        <main className="flex-1 container py-6 px-4">
-          <Card className="max-w-2xl">
+        <main className="flex-1 container mx-auto px-4 py-8 flex justify-center">
+          <Card className="w-full max-w-2xl">
             <CardHeader>
               <CardTitle>New Auction</CardTitle>
               <CardDescription>Create a new auction to collect bids from contractors.</CardDescription>
