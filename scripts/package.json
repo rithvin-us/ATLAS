@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "firebase": "^10.7.1",
+    "tsx": "^4.7.0"
+  }
+}

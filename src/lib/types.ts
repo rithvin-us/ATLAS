@@ -22,6 +22,19 @@ export interface Organization {
   createdAt: Date;
 }
 
+export interface Vendor {
+  id: string;
+  name: string;
+  industry: string;
+  location: string;
+  credibilityScore: number;
+  projectsCompleted: number;
+  verificationStatus: 'pending' | 'verified' | 'rejected';
+  specialties?: string[];
+  complianceDocs?: Document[];
+  createdAt: Date;
+}
+
 // Project types
 export interface Project {
   id: string;
@@ -63,6 +76,9 @@ export interface RFQ {
   title: string;
   description: string;
   scopeOfWork: string;
+  scope?: string;
+  location?: string;
+  budget?: number;
   eligibilityCriteria: string[];
   documents: Document[];
   status: 'draft' | 'published' | 'closed';
@@ -109,8 +125,10 @@ export interface Bid {
   id: string;
   auctionId: string;
   contractorId: string;
+  contractorName?: string;
   amount: number;
   submittedAt: Date;
+  credibilityScore?: number;
 }
 
 // Invoice types
@@ -119,6 +137,7 @@ export interface Invoice {
   projectId: string;
   milestoneId: string;
   contractorId: string;
+  agentId: string;
   amount: number;
   taxAmount: number;
   totalAmount: number;
@@ -131,6 +150,7 @@ export interface Invoice {
 
 // Credibility types
 export interface CredibilityScore {
+  id: string;
   contractorId: string;
   score: number;
   factors: {
