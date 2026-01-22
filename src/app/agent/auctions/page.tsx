@@ -45,9 +45,9 @@ export default function AgentAuctionsPage() {
 
   const stats = {
     total: auctions.length,
-    active: auctions.filter(a => a.status === 'active').length,
+    active: auctions.filter(a => a.status === 'live').length,
     completed: auctions.filter(a => a.status === 'closed').length,
-    pending: auctions.filter(a => a.status === 'draft').length,
+    pending: auctions.filter(a => a.status === 'scheduled').length,
   };
 
   return (
