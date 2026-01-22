@@ -83,7 +83,19 @@ export default function ProjectDetailPage() {
   const [submittingMilestone, setSubmittingMilestone] = useState(false);
   const [submissionNotes, setSubmissionNotes] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [proformaFiles, setProformaFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proformaInputRef = useRef<HTMLInputElement>(null);
+
+  // Create milestone dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creatingMilestone, setCreatingMilestone] = useState(false);
+  const [newMilestone, setNewMilestone] = useState({
+    name: '',
+    description: '',
+    durationDays: 30,
+    paymentAmount: 0,
+  });
 
   // Load project data
   useEffect(() => {
@@ -96,10 +108,12 @@ export default function ProjectDetailPage() {
       projectId,
       (projectData) => {
         setProject(projectData);
+        setLoading(false);
       },
       (err) => {
         console.error('Error loading project:', err);
         setError('Failed to load project');
+        setLoading(false);
       }
     );
 
@@ -139,14 +153,75 @@ export default function ProjectDetailPage() {
     loadInvoices();
   }, [projectId]);
 
+  // Create new milestone
+  const handleCreateMilestone = async () => {
+    if (!user || !projectId) return;
+
+    setCreatingMilestone(true);
+    try {
+      // Convert proforma files to base64
+      const proformaDocuments = await Promise.all(
+        proformaFiles.map(async (file) => {
+          return new Promise<{ name: string; url: string; type: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                name: file.name,
+                url: e.target?.result as string,
+                type: file.type,
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      await createContractorMilestone(projectId, user.uid, {
+        ...newMilestone,
+        proformaDocuments,
+      });
+
+      // Refresh milestones
+      const data = await fetchProjectMilestones(projectId);
+      setMilestones(data);
+
+      // Reset form
+      setShowCreateDialog(false);
+      setNewMilestone({
+        name: '',
+        description: '',
+        durationDays: 30,
+        paymentAmount: 0,
+      });
+      setProformaFiles([]);
+      setError('Milestone created and sent to agent for approval');
+    } catch (err) {
+      console.error('Error creating milestone:', err);
+      setError('Failed to create milestone');
+    } finally {
+      setCreatingMilestone(false);
+    }
+  };
+
   // Handle milestone state transition
   const handleStartMilestone = async (milestone: Milestone) => {
     if (!user) return;
 
+    // Check if milestone is approved and funded
+    if (milestone.agentApprovalStatus !== 'approved') {
+      setError('Milestone must be approved by agent before starting');
+      return;
+    }
+
+    if (milestone.escrowStatus !== 'funded') {
+      setError('Escrow must be funded before starting milestone');
+      return;
+    }
+
     try {
       await updateMilestoneState(milestone.id, 'in-progress', {
         userId: user.uid,
-        role: 'contractor',
+        userName: user.name || user.email,
       });
       // Refresh milestones
       const data = await fetchProjectMilestones(projectId);
@@ -206,6 +281,12 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleProformaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setProformaFiles(Array.from(e.target.files));
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -231,6 +312,8 @@ export default function ProjectDetailPage() {
   const completedMilestones = milestones.filter((m) => ['completed', 'verification-pending', 'verified', 'invoiced'].includes(m.status)).length;
   const totalMilestones = milestones.length;
   const progressPercentage = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
+  const totalEscrowFunded = milestones.filter(m => m.escrowStatus === 'funded' || m.escrowStatus === 'released').reduce((sum, m) => sum + (m.paymentAmount || 0), 0);
+  const totalEarned = milestones.filter(m => m.escrowStatus === 'released').reduce((sum, m) => sum + (m.paymentAmount || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -645,9 +728,9 @@ export default function ProjectDetailPage() {
                             <Badge variant="outline">{invoice.status}</Badge>
                           </div>
                           <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
-                            <span>Amount: </span>
-                            <span>Tax (5%): </span>
-                            <span>Total: </span>
+                            <span>Amount: ${invoice.amount.toLocaleString()}</span>
+                            <span>Tax (5%): ${invoice.taxAmount.toLocaleString()}</span>
+                            <span>Total: ${invoice.totalAmount.toLocaleString()}</span>
                           </div>
                           <p className="text-xs text-gray-500 mt-2">
                             Due: {new Date(invoice.dueDate).toLocaleDateString()}

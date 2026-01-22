@@ -48,10 +48,16 @@ export interface Project {
   milestones: Milestone[];
   description?: string;
   location?: string;
+  totalBudget?: number;  // Total project budget
   budget?: number;
   startDate?: Date;
   endDate?: Date;
   projectType?: string;
+  
+  // Escrow settings
+  escrowEnabled: boolean;  // Whether escrow is required for this project
+  escrowAccountId?: string;  // External escrow account reference
+  
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +70,8 @@ export interface SiteDetails {
   description: string;
 }
 
+export type EscrowStatus = 'not-funded' | 'funded' | 'released' | 'disputed' | 'refunded';
+
 export interface Milestone {
   id: string;
   projectId: string;
@@ -72,14 +80,34 @@ export interface Milestone {
   description: string;
   status: 'pending' | 'in-progress' | 'completed' | 'verification-pending' | 'verified' | 'invoiced';
   dueDate: Date;
-  payment?: number;
+  durationDays: number;  // Number of days estimated for completion
+  paymentAmount: number;  // Required payment amount for this milestone
   proofDocuments: Document[];
+  proformaDocuments: Document[];  // Proforma invoice/documents submitted by contractor
+  
+  // Contractor submission
+  createdBy: string;  // User ID who created the milestone (contractor)
   submittedBy?: string;
   submittedAt?: Date;
+  
+  // Agent approval
+  agentApprovalStatus: 'pending' | 'approved' | 'rejected' | 'revision-requested';
+  approvedBy?: string;  // Agent user ID
+  approvedAt?: Date;
+  rejectionReason?: string;
+  revisionNotes?: string;
+  
+  // Agent verification (after completion)
   verifiedBy?: string;
   verifiedAt?: Date;
+  
+  // Escrow & Payment
+  escrowStatus: EscrowStatus;
+  escrowFundedAt?: Date;
+  escrowReleasedAt?: Date;
   invoiceId?: string;
   invoiceGeneratedAt?: Date;
+  
   createdAt: Date;
   updatedAt: Date;
 }

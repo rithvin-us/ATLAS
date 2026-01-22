@@ -158,7 +158,70 @@ export function subscribeToProject(
 // ============================================================================
 
 /**
- * Create initial milestones for a project
+ * Create a milestone (by contractor) with custom amount, duration, and proforma
+ */
+export async function createContractorMilestone(
+  projectId: string,
+  contractorId: string,
+  milestoneData: {
+    name: string;
+    description: string;
+    durationDays: number;
+    paymentAmount: number;
+    proformaDocuments?: any[];
+  }
+): Promise<Milestone> {
+  try {
+    const batch = writeBatch(db);
+    const milestoneRef = doc(collection(db, 'milestones'));
+    
+    const startDate = new Date();
+    const dueDate = new Date(startDate);
+    dueDate.setDate(dueDate.getDate() + milestoneData.durationDays);
+
+    const milestone: Milestone = {
+      id: milestoneRef.id,
+      projectId,
+      name: milestoneData.name,
+      title: milestoneData.name,
+      description: milestoneData.description,
+      status: 'pending',
+      dueDate,
+      durationDays: milestoneData.durationDays,
+      paymentAmount: milestoneData.paymentAmount,
+      proofDocuments: [],
+      proformaDocuments: milestoneData.proformaDocuments || [],
+      createdBy: contractorId,
+      agentApprovalStatus: 'pending',
+      escrowStatus: 'not-funded',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    batch.set(milestoneRef, milestone);
+
+    // Update project with new milestone
+    const projectRef = doc(db, 'projects', projectId);
+    const projectSnap = await getDoc(projectRef);
+    if (projectSnap.exists()) {
+      const projectData = projectSnap.data();
+      const existingMilestones = projectData.milestones || [];
+      batch.update(projectRef, {
+        milestones: [...existingMilestones, milestone],
+        updatedAt: new Date(),
+      });
+    }
+
+    await batch.commit();
+    return milestone;
+  } catch (error) {
+    console.error('Failed to create contractor milestone:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create initial milestones for a project (legacy function for auction-based projects)
  */
 export async function createMilestones(
   projectId: string,
@@ -178,8 +241,13 @@ export async function createMilestones(
         description: data.description,
         status: 'pending',
         dueDate: data.dueDate,
-        payment: data.payment,
+        durationDays: data.durationDays || 30,
+        paymentAmount: data.paymentAmount || 0,
         proofDocuments: [],
+        proformaDocuments: data.proformaDocuments || [],
+        createdBy: data.createdBy,
+        agentApprovalStatus: data.agentApprovalStatus || 'approved',
+        escrowStatus: 'not-funded',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -232,6 +300,203 @@ export async function fetchProjectMilestones(projectId: string): Promise<Milesto
 }
 
 /**
+ * Agent approves a milestone (allows funding and contractor to start work)
+ */
+export async function agentApproveMilestone(
+  milestoneId: string,
+  agentId: string,
+  notes?: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    await updateDoc(milestoneRef, {
+      agentApprovalStatus: 'approved',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      revisionNotes: notes,
+      updatedAt: new Date(),
+    });
+
+    const milestone = milestoneSnap.data() as Milestone;
+    return {
+      ...milestone,
+      agentApprovalStatus: 'approved',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      revisionNotes: notes,
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to approve milestone:', error);
+    throw error;
+  }
+}
+
+/**
+ * Agent rejects a milestone with reason
+ */
+export async function agentRejectMilestone(
+  milestoneId: string,
+  agentId: string,
+  reason: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    await updateDoc(milestoneRef, {
+      agentApprovalStatus: 'rejected',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      rejectionReason: reason,
+      updatedAt: new Date(),
+    });
+
+    const milestone = milestoneSnap.data() as Milestone;
+    return {
+      ...milestone,
+      agentApprovalStatus: 'rejected',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      rejectionReason: reason,
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to reject milestone:', error);
+    throw error;
+  }
+}
+
+/**
+ * Agent requests revision to a milestone
+ */
+export async function agentRequestMilestoneRevision(
+  milestoneId: string,
+  agentId: string,
+  revisionNotes: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    await updateDoc(milestoneRef, {
+      agentApprovalStatus: 'revision-requested',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      revisionNotes,
+      updatedAt: new Date(),
+    });
+
+    const milestone = milestoneSnap.data() as Milestone;
+    return {
+      ...milestone,
+      agentApprovalStatus: 'revision-requested',
+      approvedBy: agentId,
+      approvedAt: new Date(),
+      revisionNotes,
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to request milestone revision:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fund escrow for a milestone (agent action after approval)
+ */
+export async function fundMilestoneEscrow(
+  milestoneId: string,
+  agentId: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    const milestone = milestoneSnap.data() as Milestone;
+    
+    // Check if milestone is approved
+    if (milestone.agentApprovalStatus !== 'approved') {
+      throw new Error('Milestone must be approved before funding escrow');
+    }
+
+    await updateDoc(milestoneRef, {
+      escrowStatus: 'funded',
+      escrowFundedAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return {
+      ...milestone,
+      escrowStatus: 'funded',
+      escrowFundedAt: new Date(),
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to fund milestone escrow:', error);
+    throw error;
+  }
+}
+
+/**
+ * Release escrow after verification (auto-called or manual agent action)
+ */
+export async function releaseMilestoneEscrow(
+  milestoneId: string,
+  agentId: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    const milestone = milestoneSnap.data() as Milestone;
+    
+    // Check if milestone is verified
+    if (milestone.status !== 'verified' && milestone.status !== 'invoiced') {
+      throw new Error('Milestone must be verified before releasing escrow');
+    }
+
+    await updateDoc(milestoneRef, {
+      escrowStatus: 'released',
+      escrowReleasedAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return {
+      ...milestone,
+      escrowStatus: 'released',
+      escrowReleasedAt: new Date(),
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to release milestone escrow:', error);
+    throw error;
+  }
+}
+
+/**
  * Update milestone state with validation
  */
 export async function updateMilestoneState(
@@ -272,7 +537,7 @@ export async function updateMilestoneState(
 
     await updateDoc(milestoneRef, updateData);
 
-    // If verified, auto-generate invoice
+    // If verified, auto-generate invoice and release escrow
     if (newState === 'verified' && !currentMilestone.invoiceId) {
       const invoice = await generateMilestoneInvoice(currentMilestone);
       await updateDoc(milestoneRef, {
@@ -280,6 +545,11 @@ export async function updateMilestoneState(
         invoiceGeneratedAt: new Date(),
         status: 'invoiced',
       });
+      
+      // Auto-release escrow if funded
+      if (currentMilestone.escrowStatus === 'funded') {
+        await releaseMilestoneEscrow(milestoneId, userData?.userId || 'system');
+      }
     }
 
     return {
@@ -356,9 +626,9 @@ export async function generateMilestoneInvoice(milestone: Milestone): Promise<In
       milestoneId: milestone.id,
       contractorId: project.contractorId || '',
       agentId: project.agentId,
-      amount: milestone.payment || 0,
-      taxAmount: Math.round((milestone.payment || 0) * 0.05), // 5% tax
-      totalAmount: Math.round((milestone.payment || 0) * 1.05),
+      amount: milestone.paymentAmount || 0,
+      taxAmount: Math.round((milestone.paymentAmount || 0) * 0.05), // 5% tax
+      totalAmount: Math.round((milestone.paymentAmount || 0) * 1.05),
       description: `Invoice for milestone: ${milestone.name}`,
       status: 'submitted',
       documents: milestone.proofDocuments,

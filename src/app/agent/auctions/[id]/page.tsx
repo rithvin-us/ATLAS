@@ -79,7 +79,7 @@ function AuctionDetailContent() {
         }
 
         const data = auctionDoc.data();
-        const auction: Auction = {
+        const auction: Auction & { bids?: Bid[] } = {
           id: auctionDoc.id,
           agentId: data.agentId,
           projectId: data.projectId,
@@ -198,7 +198,7 @@ function AuctionDetailContent() {
   const now = new Date();
   const startDate = auction ? new Date(auction.startDate) : null;
   const endDate = auction ? new Date(auction.endDate) : null;
-  const isActive = auction?.status === 'active' && startDate && endDate && now >= startDate && now <= endDate;
+  const isActive = auction?.status === 'live' && startDate && endDate && now >= startDate && now <= endDate;
 
   // Process bids with ranking - use bids from auction_bids collection
   const processedBids = useMemo(() => {
@@ -305,10 +305,9 @@ function AuctionDetailContent() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="live">Live</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
