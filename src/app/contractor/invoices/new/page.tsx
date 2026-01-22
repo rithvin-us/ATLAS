@@ -79,18 +79,18 @@ function CreateInvoiceContent() {
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
-  // Only show approved milestones that don't already have an invoice
+  // Only show verified milestones that don't already have an invoice
   const availableMilestones = selectedProject?.milestones?.filter(
-    m => m.status === 'approved'
+    m => m.status === 'verified'
   ) || [];
 
   const selectedMilestone = availableMilestones.find(m => m.id === selectedMilestoneId);
 
   // Auto-fill amount when milestone is selected
   useEffect(() => {
-    if (selectedMilestone && selectedMilestone.payment) {
-      setAmount(selectedMilestone.payment.toString());
-      setTaxAmount((selectedMilestone.payment * 0.1).toFixed(2));
+    if (selectedMilestone && selectedMilestone.paymentAmount) {
+      setAmount(selectedMilestone.paymentAmount.toString());
+      setTaxAmount((selectedMilestone.paymentAmount * 0.1).toFixed(2));
       setDescription(`Payment for milestone: ${selectedMilestone.title || selectedMilestone.name}`);
     }
   }, [selectedMilestone]);
@@ -389,23 +389,23 @@ function CreateInvoiceContent() {
                       disabled={!selectedProjectId}
                     >
                       <SelectTrigger id="milestone">
-                        <SelectValue placeholder="Select an approved milestone" />
+                        <SelectValue placeholder="Select a verified milestone" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableMilestones.length > 0 ? (
                           availableMilestones.map((milestone) => (
                             <SelectItem key={milestone.id} value={milestone.id}>
-                              {milestone.title || milestone.name} - ${milestone.payment?.toLocaleString() || '0'}
+                              {milestone.title || milestone.name} - ${milestone.paymentAmount?.toLocaleString() || '0'}
                             </SelectItem>
                           ))
                         ) : (
                           <div className="p-2 text-sm text-muted-foreground">
-                            No approved milestones available
+                            No verified milestones available
                           </div>
                         )}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground">Only approved milestones are available for invoicing.</p>
+                    <p className="text-xs text-muted-foreground">Only verified milestones are available for invoicing.</p>
                   </div>
                 </div>
 
@@ -529,7 +529,7 @@ function CreateInvoiceContent() {
                   {selectedMilestone ? (
                     <>
                       <div className="flex justify-between"><span className="text-muted-foreground">Title</span><span className="font-medium">{selectedMilestone.title || selectedMilestone.name}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="font-medium">${selectedMilestone.payment?.toLocaleString() || '0'}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="font-medium">${selectedMilestone.paymentAmount?.toLocaleString() || '0'}</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-medium capitalize">{selectedMilestone.status}</span></div>
                       <div className="text-muted-foreground text-xs">Ensure acceptance evidence is attached before submitting.</div>
                     </>

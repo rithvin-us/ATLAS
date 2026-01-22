@@ -55,6 +55,7 @@ export async function createProjectFromAuction(
       },
       milestones: [],
       budget: projectData.budget,
+      escrowEnabled: true,
       startDate: new Date(),
       endDate: projectData.endDate,
       createdAt: new Date(),
@@ -290,7 +291,7 @@ export async function fetchProjectMilestones(projectId: string): Promise<Milesto
           invoiceGeneratedAt: data.invoiceGeneratedAt?.toDate?.() || undefined,
           createdAt: data.createdAt?.toDate?.() || new Date(),
           updatedAt: data.updatedAt?.toDate?.() || new Date(),
-        };
+        } as Milestone;
       })
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   } catch (error) {
@@ -662,7 +663,7 @@ export async function fetchProjectInvoices(projectId: string): Promise<Invoice[]
           paidAt: data.paidAt?.toDate?.() || undefined,
           createdAt: data.createdAt?.toDate?.() || new Date(),
           updatedAt: data.updatedAt?.toDate?.() || new Date(),
-        };
+        } as Invoice;
       })
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {

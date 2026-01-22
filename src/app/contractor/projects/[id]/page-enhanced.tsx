@@ -221,7 +221,7 @@ export default function ProjectDetailPage() {
     try {
       await updateMilestoneState(milestone.id, 'in-progress', {
         userId: user.uid,
-        userName: user.name || user.email,
+        userName: user.email || user.uid,
       });
       // Refresh milestones
       const data = await fetchProjectMilestones(projectId);

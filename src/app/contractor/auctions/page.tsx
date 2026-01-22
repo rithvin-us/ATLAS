@@ -43,6 +43,7 @@ function AuctionsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [bids, setBids] = useState<Bid[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
   const [bidAmount, setBidAmount] = useState('');
@@ -86,10 +87,10 @@ function AuctionsContent() {
     }
   }, [filteredAuctions, selectedAuction]);
 
-  const myBids = (selectedAuction?.bids || []).filter((b) => b.contractorId === user?.uid);
+  const myBids = bids.filter((b) => b.contractorId === user?.uid);
   const myLatestBid: Bid | undefined = myBids.length ? myBids[myBids.length - 1] : undefined;
-  const currentBest = selectedAuction?.bids?.length
-    ? Math.min(...selectedAuction.bids.map((b) => b.amount))
+  const currentBest = bids.length
+    ? Math.min(...bids.map((b) => b.amount))
     : undefined;
   const auctionStatus = (auction?: Auction) => {
     if (!auction) return '—';
@@ -197,7 +198,6 @@ function AuctionsContent() {
                   </TableHeader>
                   <TableBody>
                     {filteredAuctions.map((auction) => {
-                      const best = auction.bids?.length ? Math.min(...auction.bids.map((b) => b.amount)) : undefined;
                       const isSelected = selectedAuction?.id === auction.id;
                       const remaining = timeRemaining(new Date(auction.endDate));
                       return (
@@ -211,7 +211,7 @@ function AuctionsContent() {
                             <div className="text-xs text-gray-500">Auction {auction.id.slice(0, 8)}</div>
                           </TableCell>
                           <TableCell>{formatMoney(undefined)}</TableCell>
-                          <TableCell>{best ? formatMoney(best) : '—'}</TableCell>
+                          <TableCell>{currentBest ? formatMoney(currentBest) : '—'}</TableCell>
                           <TableCell className="text-sm text-gray-800 flex items-center gap-2">
                             <Clock4 className="h-4 w-4 text-gray-500" /> {remaining}
                           </TableCell>

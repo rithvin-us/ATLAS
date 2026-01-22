@@ -141,8 +141,8 @@ export async function fetchContractorAuctions(contractorId: string): Promise<Auc
     })
     .filter(
       (auction) =>
-        auction.status === 'active' ||
-        auction.bids?.some((bid) => bid.contractorId === contractorId)
+        auction.status === 'live' ||
+        auction.status === 'scheduled'
     );
 }
 
@@ -348,8 +348,8 @@ export async function submitBid(
 
   const auctionData = auctionSnap.data() as Auction;
   
-  if (auctionData.status !== 'active') {
-    throw new Error('Auction is not active');
+  if (auctionData.status !== 'live') {
+    throw new Error('Auction is not live');
   }
 
   const now = new Date();
@@ -472,8 +472,8 @@ export async function createInvoice(
       throw new Error('Milestone not found');
     }
 
-    if (milestone.status !== 'approved') {
-      throw new Error('Invoice can only be created for approved milestones');
+    if (milestone.status !== 'verified' && milestone.status !== 'invoiced') {
+      throw new Error('Invoice can only be created for verified milestones');
     }
   }
 

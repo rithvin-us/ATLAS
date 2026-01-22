@@ -76,7 +76,6 @@ function AuctionDetailContent() {
           status: data.status,
           startDate: data.startDate?.toDate?.() || new Date(data.startDate),
           endDate: data.endDate?.toDate?.() || new Date(data.endDate),
-          bids: data.bids || [],
         };
         setAuction(normalized);
         setLoading(false);

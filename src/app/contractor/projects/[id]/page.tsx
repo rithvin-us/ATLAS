@@ -83,7 +83,19 @@ export default function ProjectDetailPage() {
   const [submittingMilestone, setSubmittingMilestone] = useState(false);
   const [submissionNotes, setSubmissionNotes] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [proformaFiles, setProformaFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proformaInputRef = useRef<HTMLInputElement>(null);
+
+  // Create milestone dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creatingMilestone, setCreatingMilestone] = useState(false);
+  const [newMilestone, setNewMilestone] = useState({
+    name: '',
+    description: '',
+    durationDays: 30,
+    paymentAmount: 0,
+  });
 
   // Load project data
   useEffect(() => {
@@ -146,7 +158,7 @@ export default function ProjectDetailPage() {
     try {
       await updateMilestoneState(milestone.id, 'in-progress', {
         userId: user.uid,
-        role: 'contractor',
+        userName: user.email || user.uid,
       });
       // Refresh milestones
       const data = await fetchProjectMilestones(projectId);
@@ -206,6 +218,61 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleProformaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setProformaFiles(Array.from(e.target.files));
+    }
+  };
+
+  // Create new milestone
+  const handleCreateMilestone = async () => {
+    if (!user || !projectId) return;
+
+    setCreatingMilestone(true);
+    try {
+      // Convert proforma files to base64
+      const proformaDocuments = await Promise.all(
+        proformaFiles.map(async (file) => {
+          return new Promise<{ name: string; url: string; type: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                name: file.name,
+                url: e.target?.result as string,
+                type: file.type,
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      await createContractorMilestone(projectId, user.uid, {
+        ...newMilestone,
+        proformaDocuments,
+      });
+
+      // Refresh milestones
+      const data = await fetchProjectMilestones(projectId);
+      setMilestones(data);
+
+      // Reset form
+      setShowCreateDialog(false);
+      setNewMilestone({
+        name: '',
+        description: '',
+        durationDays: 30,
+        paymentAmount: 0,
+      });
+      setProformaFiles([]);
+    } catch (err) {
+      console.error('Error creating milestone:', err);
+      setError('Failed to create milestone');
+    } finally {
+      setCreatingMilestone(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -231,6 +298,8 @@ export default function ProjectDetailPage() {
   const completedMilestones = milestones.filter((m) => ['completed', 'verification-pending', 'verified', 'invoiced'].includes(m.status)).length;
   const totalMilestones = milestones.length;
   const progressPercentage = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
+  const totalEscrowFunded = milestones.filter(m => m.escrowStatus === 'funded' || m.escrowStatus === 'released').reduce((sum, m) => sum + (m.paymentAmount || 0), 0);
+  const totalEarned = milestones.filter(m => m.escrowStatus === 'released').reduce((sum, m) => sum + (m.paymentAmount || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

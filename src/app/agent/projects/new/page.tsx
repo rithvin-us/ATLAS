@@ -58,6 +58,7 @@ export default function CreateProjectPage() {
         },
         status: 'draft',
         milestones: [],
+        escrowEnabled: true,
       });
 
       toast({
