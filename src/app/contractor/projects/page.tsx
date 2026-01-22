@@ -31,7 +31,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/lib/auth-context';
 import { fetchContractorProjects } from '@/lib/contractor-api';
-import { Project } from '@/lib/types';
+import { Project, Milestone } from '@/lib/types';
 
 function ProjectsContent() {
   const { user } = useAuth();
@@ -44,6 +44,65 @@ function ProjectsContent() {
   const [progressNote, setProgressNote] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
+  const buildDummyProject = (): Project => {
+    const today = new Date();
+    const inSeven = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const inThirty = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const milestones: Milestone[] = [
+      {
+        id: 'demo-m1',
+        projectId: 'demo-project',
+        title: 'Site Mobilization',
+        description: 'Set up site, safety briefing, and staging area.',
+        status: 'pending',
+        dueDate: inSeven,
+        paymentAmount: 15000,
+        createdAt: today,
+        updatedAt: today,
+      },
+      {
+        id: 'demo-m2',
+        projectId: 'demo-project',
+        title: 'Foundation Pour',
+        description: 'Rebar, formwork, and concrete pour with QA.',
+        status: 'in-progress',
+        dueDate: inThirty,
+        paymentAmount: 32000,
+        createdAt: today,
+        updatedAt: today,
+      },
+      {
+        id: 'demo-m3',
+        projectId: 'demo-project',
+        title: 'Quality Verification',
+        description: 'Agent verification and punch list closure.',
+        status: 'verification-pending',
+        dueDate: inThirty,
+        paymentAmount: 8000,
+        createdAt: today,
+        updatedAt: today,
+      },
+    ];
+
+    return {
+      id: 'demo-project',
+      name: 'Demo Logistics Hub',
+      description: 'Sample project to exercise milestone state machine and planning UI.',
+      status: 'in-progress',
+      totalBudget: 55000,
+      siteDetails: {
+        location: 'Demo City, DC',
+        latitude: 0,
+        longitude: 0,
+      },
+      milestones,
+      createdAt: today,
+      updatedAt: today,
+      contractorId: user?.uid ?? 'demo-contractor',
+      agentId: 'demo-agent',
+    } as Project;
+  };
+
   useEffect(() => {
     async function loadProjects() {
       if (!user) return;
@@ -51,8 +110,14 @@ function ProjectsContent() {
       try {
         setLoading(true);
         const data = await fetchContractorProjects(user.uid);
-        setProjects(data);
-        setSelectedProject((prev) => prev || data[0] || null);
+        if (data.length === 0) {
+          const dummy = buildDummyProject();
+          setProjects([dummy]);
+          setSelectedProject(dummy);
+        } else {
+          setProjects(data);
+          setSelectedProject((prev) => prev || data[0] || null);
+        }
       } catch (err) {
         console.error('Failed to load projects:', err);
         setError('Failed to load projects. Please try again.');

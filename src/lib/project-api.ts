@@ -1,0 +1,402 @@
+/**
+ * Project and Milestone Management API
+ * Handles work management, milestone state transitions, and auto-invoice generation
+ */
+
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+  query,
+  where,
+  onSnapshot,
+  Timestamp,
+  writeBatch,
+} from 'firebase/firestore';
+import { db } from './firebase';
+import {
+  Project,
+  Milestone,
+  MilestoneState,
+  canTransitionMilestoneState,
+  Invoice,
+} from './types';
+
+// ============================================================================
+// PROJECT MANAGEMENT
+// ============================================================================
+
+/**
+ * Create a project from completed auction (auto-called after auction ends)
+ */
+export async function createProjectFromAuction(
+  auctionId: string,
+  contractorId: string,
+  agentId: string,
+  projectData: Partial<Project>
+): Promise<Project> {
+  try {
+    const projectRef = doc(collection(db, 'projects'));
+    const newProject: Project = {
+      id: projectRef.id,
+      name: projectData.name || `Project ${projectRef.id.slice(0, 8)}`,
+      agentId,
+      contractorId,
+      rfqId: projectData.rfqId,
+      status: 'active',
+      siteDetails: projectData.siteDetails || {
+        name: 'To be updated',
+        location: projectData.location || '',
+        address: projectData.location || '',
+        description: '',
+      },
+      milestones: [],
+      budget: projectData.budget,
+      startDate: new Date(),
+      endDate: projectData.endDate,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(projectRef, newProject);
+    return newProject;
+  } catch (error) {
+    console.error('Failed to create project from auction:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all projects for a contractor
+ */
+export async function fetchContractorProjects(contractorId: string): Promise<Project[]> {
+  try {
+    const q = query(collection(db, 'projects'), where('contractorId', '==', contractorId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+      createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+    })) as Project[];
+  } catch (error) {
+    console.error('Failed to fetch contractor projects:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all projects for an agent
+ */
+export async function fetchAgentProjects(agentId: string): Promise<Project[]> {
+  try {
+    const q = query(collection(db, 'projects'), where('agentId', '==', agentId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+      createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+    })) as Project[];
+  } catch (error) {
+    console.error('Failed to fetch agent projects:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch a single project with real-time listener
+ */
+export function subscribeToProject(
+  projectId: string,
+  onSuccess: (project: Project) => void,
+  onError: (error: Error) => void
+) {
+  try {
+    const projectRef = doc(db, 'projects', projectId);
+    return onSnapshot(
+      projectRef,
+      (snap) => {
+        if (!snap.exists()) {
+          onError(new Error('Project not found'));
+          return;
+        }
+        const data = snap.data();
+        const project: Project = {
+          ...data,
+          id: snap.id,
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(),
+          milestones: (data.milestones || []).map((m: any) => ({
+            ...m,
+            dueDate: m.dueDate?.toDate?.() || new Date(m.dueDate),
+            submittedAt: m.submittedAt?.toDate?.() || undefined,
+            verifiedAt: m.verifiedAt?.toDate?.() || undefined,
+            invoiceGeneratedAt: m.invoiceGeneratedAt?.toDate?.() || undefined,
+            createdAt: m.createdAt?.toDate?.() || new Date(),
+            updatedAt: m.updatedAt?.toDate?.() || new Date(),
+          })),
+        } as Project;
+        onSuccess(project);
+      },
+      (error) => {
+        console.error('Error subscribing to project:', error);
+        onError(error);
+      }
+    );
+  } catch (error) {
+    console.error('Failed to subscribe to project:', error);
+    throw error;
+  }
+}
+
+// ============================================================================
+// MILESTONE MANAGEMENT
+// ============================================================================
+
+/**
+ * Create initial milestones for a project
+ */
+export async function createMilestones(
+  projectId: string,
+  milestonesData: Omit<Milestone, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>[]
+): Promise<Milestone[]> {
+  try {
+    const batch = writeBatch(db);
+    const createdMilestones: Milestone[] = [];
+
+    for (const data of milestonesData) {
+      const milestoneRef = doc(collection(db, 'milestones'));
+      const milestone: Milestone = {
+        id: milestoneRef.id,
+        projectId,
+        name: data.name,
+        title: data.title,
+        description: data.description,
+        status: 'pending',
+        dueDate: data.dueDate,
+        payment: data.payment,
+        proofDocuments: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      batch.set(milestoneRef, milestone);
+      createdMilestones.push(milestone);
+    }
+
+    // Add milestones to project
+    const projectRef = doc(db, 'projects', projectId);
+    batch.update(projectRef, {
+      milestones: createdMilestones,
+      updatedAt: new Date(),
+    });
+
+    await batch.commit();
+    return createdMilestones;
+  } catch (error) {
+    console.error('Failed to create milestones:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all milestones for a project
+ */
+export async function fetchProjectMilestones(projectId: string): Promise<Milestone[]> {
+  try {
+    const q = query(collection(db, 'milestones'), where('projectId', '==', projectId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          dueDate: data.dueDate?.toDate?.() || new Date(data.dueDate),
+          submittedAt: data.submittedAt?.toDate?.() || undefined,
+          verifiedAt: data.verifiedAt?.toDate?.() || undefined,
+          invoiceGeneratedAt: data.invoiceGeneratedAt?.toDate?.() || undefined,
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        };
+      })
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  } catch (error) {
+    console.error('Failed to fetch milestones:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update milestone state with validation
+ */
+export async function updateMilestoneState(
+  milestoneId: string,
+  newState: MilestoneState,
+  userData?: { userId: string; userName: string }
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    const currentMilestone = milestoneSnap.data() as Milestone;
+    const currentState = currentMilestone.status as MilestoneState;
+
+    // Validate state transition
+    if (!canTransitionMilestoneState(currentState, newState)) {
+      throw new Error(`Invalid transition from ${currentState} to ${newState}`);
+    }
+
+    // Prepare update data based on new state
+    const updateData: any = {
+      status: newState,
+      updatedAt: new Date(),
+    };
+
+    // Set timestamps based on state
+    if (newState === 'completed') {
+      updateData.submittedBy = userData?.userId;
+      updateData.submittedAt = new Date();
+    } else if (newState === 'verified') {
+      updateData.verifiedBy = userData?.userId;
+      updateData.verifiedAt = new Date();
+    }
+
+    await updateDoc(milestoneRef, updateData);
+
+    // If verified, auto-generate invoice
+    if (newState === 'verified' && !currentMilestone.invoiceId) {
+      const invoice = await generateMilestoneInvoice(currentMilestone);
+      await updateDoc(milestoneRef, {
+        invoiceId: invoice.id,
+        invoiceGeneratedAt: new Date(),
+        status: 'invoiced',
+      });
+    }
+
+    return {
+      ...currentMilestone,
+      ...updateData,
+    };
+  } catch (error) {
+    console.error('Failed to update milestone state:', error);
+    throw error;
+  }
+}
+
+/**
+ * Submit milestone completion with proof documents
+ */
+export async function submitMilestoneCompletion(
+  milestoneId: string,
+  proofDocuments: any[],
+  userId: string
+): Promise<Milestone> {
+  try {
+    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneSnap = await getDoc(milestoneRef);
+
+    if (!milestoneSnap.exists()) {
+      throw new Error('Milestone not found');
+    }
+
+    await updateDoc(milestoneRef, {
+      status: 'completed',
+      proofDocuments,
+      submittedBy: userId,
+      submittedAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return {
+      ...(milestoneSnap.data() as Milestone),
+      status: 'completed',
+      proofDocuments,
+      submittedBy: userId,
+      submittedAt: new Date(),
+      updatedAt: new Date(),
+    };
+  } catch (error) {
+    console.error('Failed to submit milestone completion:', error);
+    throw error;
+  }
+}
+
+// ============================================================================
+// INVOICE AUTO-GENERATION
+// ============================================================================
+
+/**
+ * Auto-generate invoice when milestone is verified
+ */
+export async function generateMilestoneInvoice(milestone: Milestone): Promise<Invoice> {
+  try {
+    // Fetch project to get contractor and agent info
+    const projectRef = doc(db, 'projects', milestone.projectId);
+    const projectSnap = await getDoc(projectRef);
+
+    if (!projectSnap.exists()) {
+      throw new Error('Project not found');
+    }
+
+    const project = projectSnap.data() as Project;
+    const invoiceRef = doc(collection(db, 'invoices'));
+
+    const invoice: Invoice = {
+      id: invoiceRef.id,
+      projectId: milestone.projectId,
+      milestoneId: milestone.id,
+      contractorId: project.contractorId || '',
+      agentId: project.agentId,
+      amount: milestone.payment || 0,
+      taxAmount: Math.round((milestone.payment || 0) * 0.05), // 5% tax
+      totalAmount: Math.round((milestone.payment || 0) * 1.05),
+      description: `Invoice for milestone: ${milestone.name}`,
+      status: 'submitted',
+      documents: milestone.proofDocuments,
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(invoiceRef, invoice);
+    return invoice;
+  } catch (error) {
+    console.error('Failed to generate invoice:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all invoices generated from milestones
+ */
+export async function fetchProjectInvoices(projectId: string): Promise<Invoice[]> {
+  try {
+    const q = query(collection(db, 'invoices'), where('projectId', '==', projectId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          dueDate: data.dueDate?.toDate?.() || new Date(),
+          paidAt: data.paidAt?.toDate?.() || undefined,
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        };
+      })
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } catch (error) {
+    console.error('Failed to fetch project invoices:', error);
+    throw error;
+  }
+}

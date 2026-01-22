@@ -34,7 +34,7 @@ import { ContractorGuard } from "@/components/contractor/contractor-guard";
 import { useAuth } from "@/lib/auth-context";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Auction, Bid } from "@/lib/types";
+import { Auction, Bid, deriveAuctionStatus } from "@/lib/types";
 import { submitBid } from "@/lib/contractor-api";
 
 function AuctionDetailContent() {
@@ -140,8 +140,9 @@ function AuctionDetailContent() {
   const now = new Date();
   const startDate = auction ? new Date(auction.startDate) : null;
   const endDate = auction ? new Date(auction.endDate) : null;
-  const isActive = auction?.status === "active" && startDate && endDate && now >= startDate && now <= endDate;
-  const isClosed = !isActive || (endDate && now > endDate);
+  const auctionStatus = auction ? deriveAuctionStatus(auction.startDate, auction.endDate) : null;
+  const isActive = auctionStatus === 'live';
+  const isClosed = auctionStatus === 'closed';
 
   const myBids = bids.filter((b) => b.contractorId === user?.uid);
   const myBid = myBids.length ? myBids[myBids.length - 1] : null;
@@ -242,7 +243,7 @@ function AuctionDetailContent() {
                   <CardTitle className="text-2xl">Project: {auction.projectId.slice(0, 12)}...</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant={isActive ? 'default' : 'secondary'} className="text-sm">
-                      {isClosed ? 'Closed' : isActive ? 'Open' : auction.status}
+                      {auctionStatus === 'scheduled' ? '⏳ Scheduled' : auctionStatus === 'live' ? '🟢 Live' : '🔒 Closed'}
                     </Badge>
                     {!isClosed && (
                       <Badge variant="outline" className="text-sm flex items-center gap-1">

@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { db } from './firebase';
-import { Auction, Bid, CredibilityScore, Invoice, Project, RFQ, Vendor } from './types';
+import { Auction, Bid, CredibilityScore, Invoice, Project, RFQ, Vendor, deriveAuctionStatus } from './types';
 
 interface FirestoreEntity {
   id: string;
@@ -93,31 +93,45 @@ export async function fetchAuctions(agentId: string): Promise<Auction[]> {
   const auctionsRef = collection(db, 'auctions');
   const q = query(auctionsRef, where('agentId', '==', agentId), orderBy('startDate', 'desc'));
   const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => convertDates<Auction>(docSnap.data(), docSnap.id));
+  return snap.docs.map((docSnap) => {
+    const data = docSnap.data();
+    const startDate = data.startDate?.toDate?.() || new Date(data.startDate);
+    const endDate = data.endDate?.toDate?.() || new Date(data.endDate);
+    return {
+      ...convertDates<Auction>(data, docSnap.id),
+      status: deriveAuctionStatus(startDate, endDate),
+      startDate,
+      endDate,
+    };
+  });
 }
 
 export async function fetchAuction(auctionId: string): Promise<Auction | null> {
   const ref = doc(db, 'auctions', auctionId);
   const snap = await getDoc(ref);
-  return snap.exists() ? convertDates<Auction>(snap.data(), snap.id) : null;
+  if (!snap.exists()) return null;
+  
+  const data = snap.data();
+  const startDate = data.startDate?.toDate?.() || new Date(data.startDate);
+  const endDate = data.endDate?.toDate?.() || new Date(data.endDate);
+  return {
+    ...convertDates<Auction>(data, snap.id),
+    status: deriveAuctionStatus(startDate, endDate),
+    startDate,
+    endDate,
+  };
 }
 
-export async function createAuction(agentId: string, payload: Omit<Auction, 'id' | 'agentId' | 'status' | 'bids'> & { status?: Auction['status'] }): Promise<string> {
+export async function createAuction(agentId: string, payload: Omit<Auction, 'id' | 'agentId' | 'status' | 'createdAt'>): Promise<string> {
   const ref = collection(db, 'auctions');
   const data = {
     ...payload,
     agentId,
-    bids: [],
-    status: payload.status ?? 'draft',
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
   const newDoc = await addDoc(ref, data);
   return newDoc.id;
-}
-
-export async function updateAuctionStatus(auctionId: string, status: Auction['status']): Promise<void> {
-  const ref = doc(db, 'auctions', auctionId);
-  await updateDoc(ref, { status });
 }
 
 export async function fetchInvoices(agentId: string): Promise<Invoice[]> {

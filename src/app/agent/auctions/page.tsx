@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { AgentGuard } from '@/components/agent/agent-guard';
 import { useAuth } from '@/lib/auth-context';
 import { fetchAuctions } from '@/lib/agent-api';
-import { Auction } from '@/lib/types';
+import { Auction, deriveAuctionStatus } from '@/lib/types';
 import { Gavel, Loader2, Search } from 'lucide-react';
 
 export default function AgentAuctionsPage() {
@@ -151,9 +151,18 @@ export default function AgentAuctionsPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">RFQ {auction.projectId?.substring(0, 8)}</h3>
-                        <Badge variant={auction.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                          {auction.status}
+                        <h3 className="font-semibold text-gray-900">
+                          {auction.title || `Auction ${auction.id.substring(0, 8)}`}
+                        </h3>
+                        <Badge 
+                          variant={
+                            auction.status === 'live' ? 'default' :
+                            auction.status === 'scheduled' ? 'secondary' :
+                            'outline'
+                          } 
+                          className="text-xs"
+                        >
+                          {auction.status.toUpperCase()}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">{auction.type} auction</p>
@@ -162,20 +171,22 @@ export default function AgentAuctionsPage() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-500">Starts</p>
-                      <p className="text-sm font-medium text-gray-900">{auction.startDate ? new Date(auction.startDate).toLocaleString() : 'N/A'}</p>
+                      <p className="text-sm font-medium text-gray-900">{new Date(auction.startDate).toLocaleDateString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Ends</p>
-                      <p className="text-sm font-medium text-gray-900">{auction.endDate ? new Date(auction.endDate).toLocaleString() : 'N/A'}</p>
+                      <p className="text-sm font-medium text-gray-900">{new Date(auction.endDate).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/agent/auctions/${auction.id}`} className="flex-1">
                       <Button className="w-full" size="sm">View Auction</Button>
                     </Link>
-                    <Link href={`/agent/rfq/${auction.projectId}`} className="flex-1">
-                      <Button variant="outline" className="w-full" size="sm">Linked RFQ</Button>
-                    </Link>
+                    {auction.rfqId && (
+                      <Link href={`/agent/rfqs/${auction.rfqId}`} className="flex-1">
+                        <Button variant="outline" className="w-full" size="sm">Linked RFQ</Button>
+                      </Link>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -70,12 +70,18 @@ export interface Milestone {
   name: string;
   title?: string;
   description: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'approved';
+  status: 'pending' | 'in-progress' | 'completed' | 'verification-pending' | 'verified' | 'invoiced';
   dueDate: Date;
   payment?: number;
   proofDocuments: Document[];
-  approvedBy?: string;
-  approvedAt?: Date;
+  submittedBy?: string;
+  submittedAt?: Date;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+  invoiceId?: string;
+  invoiceGeneratedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // RFQ/RFI types
@@ -122,13 +128,29 @@ export interface Question {
 export interface Auction {
   id: string;
   projectId: string;
+  rfqId?: string;  // Link to source RFQ for context
   agentId: string;
   type: 'reverse' | 'sealed';
-  status: 'draft' | 'active' | 'closed';
+  status: 'scheduled' | 'live' | 'closed';  // Derived from startDate/endDate on fetch
   startDate: Date;
   endDate: Date;
-  bids: Bid[];
+  title?: string;  // Auction title/description
+  createdAt?: Date;
+  updatedAt?: Date;
   winnerId?: string;
+}
+
+/**
+ * Derive auction status from current time and stored times.
+ * Scheduled: now < startDate
+ * Live: startDate <= now < endDate
+ * Closed: now >= endDate
+ */
+export function deriveAuctionStatus(startDate: Date, endDate: Date): 'scheduled' | 'live' | 'closed' {
+  const now = new Date();
+  if (now < startDate) return 'scheduled';
+  if (now < endDate) return 'live';
+  return 'closed';
 }
 
 export interface Bid {
@@ -254,4 +276,38 @@ export interface Thread {
   participants: string[];
   messages: Message[];
   createdAt: Date;
+}
+
+/**
+ * Milestone State Machine: Defines valid transitions for milestone lifecycle
+ * 
+ * pending → in-progress → completed → verification-pending → verified → invoiced
+ * 
+ * States:
+ * - pending: Initial state, awaiting contractor to start work
+ * - in-progress: Contractor is working on the milestone
+ * - completed: Contractor marked as complete, submitted proof documents
+ * - verification-pending: Awaiting agent verification
+ * - verified: Agent verified the completion and proof
+ * - invoiced: Invoice auto-generated and ready for payment
+ */
+export type MilestoneState = 'pending' | 'in-progress' | 'completed' | 'verification-pending' | 'verified' | 'invoiced';
+
+export function deriveMilestoneState(milestone: Milestone): MilestoneState {
+  // State is stored explicitly for milestones (unlike auctions)
+  // This function can be used for state validation
+  return milestone.status as MilestoneState;
+}
+
+export function canTransitionMilestoneState(from: MilestoneState, to: MilestoneState): boolean {
+  const validTransitions: Record<MilestoneState, MilestoneState[]> = {
+    pending: ['in-progress'],
+    'in-progress': ['completed', 'pending'], // Can revert
+    completed: ['verification-pending', 'in-progress'], // Can revert
+    'verification-pending': ['verified', 'completed'], // Agent can reject back
+    verified: ['invoiced'],
+    invoiced: [], // Terminal state
+  };
+  
+  return validTransitions[from]?.includes(to) ?? false;
 }

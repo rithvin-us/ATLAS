@@ -22,11 +22,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { fetchContractorAuctions } from '@/lib/contractor-api';
-import { Auction, Bid } from '@/lib/types';
+import { Auction, Bid, deriveAuctionStatus } from '@/lib/types';
 
 function formatMoney(amount?: number) {
   if (amount == null) return '—';
-  return `$${(amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  return `$${amount.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
 }
 
 function timeRemaining(end: Date) {
@@ -93,11 +93,11 @@ function AuctionsContent() {
     : undefined;
   const auctionStatus = (auction?: Auction) => {
     if (!auction) return '—';
-    const now = Date.now();
-    if (now > new Date(auction.endDate).getTime()) return 'Closed';
-    if (now < new Date(auction.startDate).getTime()) return 'Not started';
-    if (auction.status === 'active') return 'Active';
-    return auction.status;
+    return deriveAuctionStatus(auction.startDate, auction.endDate) === 'scheduled'
+      ? '⏳ Scheduled'
+      : deriveAuctionStatus(auction.startDate, auction.endDate) === 'live'
+      ? '🟢 Live'
+      : '🔒 Closed';
   };
 
   const handleBid = (e: React.FormEvent) => {

@@ -1,317 +1,468 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { 
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  DollarSign,
-  CheckCircle2,
-  Circle,
-  Clock,
-  Loader2,
-  AlertCircle,
-  FileText
-} from 'lucide-react';
-import { ContractorGuard } from '@/components/contractor/contractor-guard';
+import { useEffect, useState, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Project, Milestone } from '@/lib/types';
+import {
+  subscribeToProject,
+  fetchProjectMilestones,
+  fetchProjectInvoices,
+  submitMilestoneCompletion,
+  updateMilestoneState,
+} from '@/lib/project-api';
+import { Project, Milestone, Invoice } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle2, Clock, FileText, Upload } from 'lucide-react';
 
-function ProjectDetailContent() {
-  const { user } = useAuth();
+const getMilestoneStateColor = (state: string) => {
+  const colors: Record<string, string> = {
+    'pending': 'bg-gray-100 text-gray-800',
+    'in-progress': 'bg-blue-100 text-blue-800',
+    'completed': 'bg-yellow-100 text-yellow-800',
+    'verification-pending': 'bg-orange-100 text-orange-800',
+    'verified': 'bg-green-100 text-green-800',
+    'invoiced': 'bg-purple-100 text-purple-800',
+  };
+  return colors[state] || 'bg-gray-100 text-gray-800';
+};
+
+const getMilestoneStateLabel = (state: string) => {
+  const labels: Record<string, string> = {
+    'pending': 'Pending',
+    'in-progress': 'In Progress',
+    'completed': 'Completed',
+    'verification-pending': 'Awaiting Verification',
+    'verified': 'Verified',
+    'invoiced': 'Invoiced',
+  };
+  return labels[state] || state;
+};
+
+export default function ProjectDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const projectId = params.id as string;
+  const { user } = useAuth();
 
+  const [project, setProject] = useState<Project | null>(null);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [project, setProject] = useState<Project | null>(null);
+  const [activeTab, setActiveTab] = useState('milestones');
+  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
+  const [submittingMilestone, setSubmittingMilestone] = useState(false);
+  const [submissionNotes, setSubmissionNotes] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load project data
   useEffect(() => {
-    async function loadProject() {
-      if (!user) return;
+    if (!projectId || !user) return;
 
-      try {
-        setLoading(true);
-        const projectRef = doc(db, 'projects', projectId);
-        const projectDoc = await getDoc(projectRef);
+    setLoading(true);
+    setError(null);
 
-        if (!projectDoc.exists()) {
-          setError('Project not found');
-          return;
-        }
-
-        const data = projectDoc.data();
-        const project: Project = {
-          id: projectDoc.id,
-          agentId: data.agentId,
-          contractorId: data.contractorId,
-          rfqId: data.rfqId,
-          name: data.name || data.projectName || 'Untitled Project',
-          projectName: data.projectName,
-          description: data.description,
-          location: data.location,
-          budget: data.budget,
-          projectType: data.projectType,
-          status: data.status,
-          startDate: data.startDate?.toDate?.() || (data.startDate ? new Date(data.startDate) : undefined),
-          endDate: data.endDate?.toDate?.() || (data.endDate ? new Date(data.endDate) : undefined),
-          siteDetails: data.siteDetails || {
-            name: data.name || 'Site',
-            location: data.location || 'TBD',
-            address: data.address || 'TBD',
-            description: data.description || '',
-          },
-          milestones: data.milestones || [],
-          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
-          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
-        };
-
-        // Verify this project belongs to the contractor
-        if (project.contractorId !== user.uid) {
-          setError('You do not have access to this project');
-          return;
-        }
-
-        setProject(project);
-      } catch (err) {
-        console.error('Failed to load project:', err);
-        setError('Failed to load project. Please try again.');
-      } finally {
-        setLoading(false);
+    const unsubscribeProject = subscribeToProject(
+      projectId,
+      (projectData) => {
+        setProject(projectData);
+      },
+      (err) => {
+        console.error('Error loading project:', err);
+        setError('Failed to load project');
       }
-    }
+    );
 
-    loadProject();
-  }, [user, projectId]);
+    return () => unsubscribeProject();
+  }, [projectId, user]);
+
+  // Load milestones
+  useEffect(() => {
+    if (!projectId) return;
+
+    const loadMilestones = async () => {
+      try {
+        const data = await fetchProjectMilestones(projectId);
+        setMilestones(data);
+      } catch (err) {
+        console.error('Error loading milestones:', err);
+        setError('Failed to load milestones');
+      }
+    };
+
+    loadMilestones();
+  }, [projectId]);
+
+  // Load invoices
+  useEffect(() => {
+    if (!projectId) return;
+
+    const loadInvoices = async () => {
+      try {
+        const data = await fetchProjectInvoices(projectId);
+        setInvoices(data);
+      } catch (err) {
+        console.error('Error loading invoices:', err);
+      }
+    };
+
+    loadInvoices();
+  }, [projectId]);
+
+  // Handle milestone state transition
+  const handleStartMilestone = async (milestone: Milestone) => {
+    if (!user) return;
+
+    try {
+      await updateMilestoneState(milestone.id, 'in-progress', {
+        userId: user.uid,
+        role: 'contractor',
+      });
+      // Refresh milestones
+      const data = await fetchProjectMilestones(projectId);
+      setMilestones(data);
+    } catch (err) {
+      console.error('Error starting milestone:', err);
+      setError('Failed to start milestone');
+    }
+  };
+
+  // Handle milestone completion submission
+  const handleSubmitCompletion = async () => {
+    if (!selectedMilestone || !user) return;
+
+    setSubmittingMilestone(true);
+    try {
+      // Convert files to base64 for storage
+      const proofDocuments = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          return new Promise<{ name: string; url: string; type: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                name: file.name,
+                url: e.target?.result as string,
+                type: file.type,
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      await submitMilestoneCompletion(selectedMilestone.id, proofDocuments, user.uid);
+
+      // Refresh milestones
+      const data = await fetchProjectMilestones(projectId);
+      setMilestones(data);
+
+      // Reset dialog
+      setSelectedMilestone(null);
+      setSubmissionNotes('');
+      setUploadedFiles([]);
+
+      setError('Milestone completion submitted for verification');
+    } catch (err) {
+      console.error('Error submitting completion:', err);
+      setError('Failed to submit completion');
+    } finally {
+      setSubmittingMilestone(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUploadedFiles(Array.from(e.target.files));
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error || !project) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <p className="text-lg font-medium">{error || 'Project not found'}</p>
-          <Button className="mt-4" onClick={() => router.push('/contractor/projects')}>
-            Back to Projects
-          </Button>
+      <div className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3" />
+          <div className="h-32 bg-gray-200 rounded" />
         </div>
       </div>
     );
   }
 
-  const completedMilestones = project.milestones?.filter(m => m.status === 'completed').length || 0;
-  const totalMilestones = project.milestones?.length || 0;
-  const progress = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
+  if (!project) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Project not found</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const completedMilestones = milestones.filter((m) => ['completed', 'verification-pending', 'verified', 'invoiced'].includes(m.status)).length;
+  const totalMilestones = milestones.length;
+  const progressPercentage = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container flex h-16 items-center px-4">
-          <Link href="/contractor/projects" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">{project.name}</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Project Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
+          <p className="text-gray-600 mt-1">{project.description}</p>
         </div>
-      </header>
 
-      <main className="flex-1 container py-6 px-4">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Project Overview */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Project Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Budget</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900"></div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Milestones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900">{totalMilestones}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Completed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{completedMilestones}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900">{Math.round(progressPercentage)}%</div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                  className="bg-green-600 h-2 rounded-full transition-all"
+                  style={{ width: ${progressPercentage}% }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList>
+            <TabsTrigger value="milestones">Milestones</TabsTrigger>
+            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="milestones" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Project Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="font-semibold">Description</h3>
-                  <p className="text-muted-foreground">{project.description}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">Location</div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>{project.location}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">Budget</div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
-                      <span>${project.budget?.toLocaleString() || 'TBD'}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">Start Date</div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'TBD'}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">End Date</div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'TBD'}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Milestones */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Milestones</CardTitle>
-                  <Badge variant="outline">
-                    {completedMilestones} / {totalMilestones} completed
-                  </Badge>
-                </div>
+                <CardTitle>Project Milestones</CardTitle>
+                <CardDescription>Manage and track milestone completion</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {project.milestones && project.milestones.length > 0 ? (
-                    project.milestones.map((milestone) => (
-                      <div key={milestone.id} className="border rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-start gap-3 flex-1">
-                            {milestone.status === 'completed' ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                            ) : milestone.status === 'in-progress' ? (
-                              <Clock className="h-5 w-5 text-blue-500 mt-0.5" />
-                            ) : (
-                              <Circle className="h-5 w-5 text-gray-300 mt-0.5" />
-                            )}
-                            <div className="flex-1">
-                              <h4 className="font-semibold">{milestone.title}</h4>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {milestone.description}
-                              </p>
-                            </div>
+                <div className="space-y-3">
+                  {milestones.length === 0 ? (
+                    <p className="text-gray-500 text-center py-6">No milestones yet</p>
+                  ) : (
+                    milestones.map((milestone) => (
+                      <div
+                        key={milestone.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-semibold text-gray-900">{milestone.title}</h3>
+                            <Badge className={getMilestoneStateColor(milestone.status)}>
+                              {getMilestoneStateLabel(milestone.status)}
+                            </Badge>
                           </div>
-                          <Badge variant={
-                            milestone.status === 'completed' ? 'default' :
-                            milestone.status === 'in-progress' ? 'secondary' :
-                            'outline'
-                          }>
-                            {milestone.status}
-                          </Badge>
+                          <p className="text-sm text-gray-600 mb-2">{milestone.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <FileText className="h-4 w-4" />
+                              Payment: 
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              Due: {new Date(milestone.dueDate).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Payment: </span>
-                            <span className="font-semibold">${milestone.payment?.toLocaleString() || '0'}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Due: </span>
-                            <span>{new Date(milestone.dueDate).toLocaleDateString()}</span>
-                          </div>
-                          {milestone.status === 'approved' && (
-                            <Button size="sm" asChild>
-                              <Link href={`/contractor/invoices/new?milestoneId=${milestone.id}&projectId=${project.id}`}>
-                                Create Invoice
-                              </Link>
+                        <div className="flex gap-2">
+                          {milestone.status === 'pending' && (
+                            <Button
+                              onClick={() => handleStartMilestone(milestone)}
+                              variant="default"
+                              size="sm"
+                            >
+                              Start
                             </Button>
+                          )}
+
+                          {milestone.status === 'in-progress' && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  onClick={() => setSelectedMilestone(milestone)}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Mark Complete
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Submit Milestone Completion</DialogTitle>
+                                  <DialogDescription>
+                                    Provide proof documents that demonstrate completion of "{milestone.title}"
+                                  </DialogDescription>
+                                </DialogHeader>
+
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                      Proof Documents
+                                    </label>
+                                    <div
+                                      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
+                                      onClick={() => fileInputRef.current?.click()}
+                                    >
+                                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                      <p className="text-sm text-gray-600">Click to upload or drag files</p>
+                                      <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        accept=".pdf,.doc,.docx,.jpg,.png,.zip"
+                                      />
+                                    </div>
+                                    {uploadedFiles.length > 0 && (
+                                      <div className="mt-3 space-y-2">
+                                        {uploadedFiles.map((file) => (
+                                          <div key={file.name} className="flex items-center gap-2 text-sm">
+                                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                            {file.name}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                      Notes (optional)
+                                    </label>
+                                    <Textarea
+                                      value={submissionNotes}
+                                      onChange={(e) => setSubmissionNotes(e.target.value)}
+                                      placeholder="Add any notes about this milestone completion..."
+                                      className="min-h-24"
+                                    />
+                                  </div>
+
+                                  <div className="flex gap-2 justify-end pt-4">
+                                    <Button variant="outline">Cancel</Button>
+                                    <Button
+                                      onClick={handleSubmitCompletion}
+                                      disabled={submittingMilestone || uploadedFiles.length === 0}
+                                    >
+                                      {submittingMilestone ? 'Submitting...' : 'Submit for Verification'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+
+                          {['completed', 'verification-pending'].includes(milestone.status) && (
+                            <Badge variant="outline" className="w-fit">
+                              Awaiting Agent Review
+                            </Badge>
+                          )}
+
+                          {['verified', 'invoiced'].includes(milestone.status) && (
+                            <Badge variant="outline" className="w-fit bg-green-50 text-green-700 border-green-200">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Approved
+                            </Badge>
                           )}
                         </div>
                       </div>
                     ))
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No milestones defined for this project.
-                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Status Card */}
+          <TabsContent value="invoices" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Status</CardTitle>
+                <CardTitle>Generated Invoices</CardTitle>
+                <CardDescription>Invoices automatically generated upon milestone verification</CardDescription>
               </CardHeader>
               <CardContent>
-                <Badge 
-                  variant={
-                    project.status === 'completed' ? 'default' :
-                    project.status === 'in-progress' ? 'secondary' :
-                    'outline'
-                  }
-                  className="text-base px-4 py-2"
-                >
-                  {project.status}
-                </Badge>
-              </CardContent>
-            </Card>
-
-            {/* Progress Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Overall Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Completion</span>
-                    <span className="font-semibold">{Math.round(progress)}%</span>
-                  </div>
-                  <Progress value={progress} />
-                  <p className="text-xs text-muted-foreground">
-                    {completedMilestones} of {totalMilestones} milestones completed
-                  </p>
+                <div className="space-y-3">
+                  {invoices.length === 0 ? (
+                    <p className="text-gray-500 text-center py-6">No invoices generated yet</p>
+                  ) : (
+                    invoices.map((invoice) => (
+                      <div
+                        key={invoice.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-semibold text-gray-900">Invoice #{invoice.id.slice(0, 8)}</h3>
+                            <Badge variant="outline">{invoice.status}</Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
+                            <span>Amount: </span>
+                            <span>Tax (5%): </span>
+                            <span>Total: </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Due: {new Date(invoice.dueDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View Invoice
+                        </Button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href="/contractor/invoices/new">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Create Invoice
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
-  );
-}
-
-export default function ContractorProjectDetailPage() {
-  return (
-    <ContractorGuard>
-      <ProjectDetailContent />
-    </ContractorGuard>
   );
 }
