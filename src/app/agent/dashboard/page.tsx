@@ -134,7 +134,7 @@ function DashboardContent() {
   const pendingInvoices = invoices.filter(i => i.status === 'submitted');
   const approvedInvoices = invoices.filter(i => i.status === 'approved');
   const paidInvoices = invoices.filter(i => i.status === 'paid');
-  const activeAuctions = auctions.filter(a => a.status === 'active');
+  const activeAuctions = auctions.filter(a => a.status === 'live');
 
   const quickActions = [
     { icon: FileText, label: 'Browse RFQs', href: '/agent/rfq', count: activeRFQs.length, color: 'blue' },
