@@ -33,7 +33,7 @@ import {
 import { ContractorGuard } from "@/components/contractor/contractor-guard";
 import { useAuth } from "@/lib/auth-context";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getFirebaseDb } from "@/lib/firebase-client";
 import { Auction, Bid, deriveAuctionStatus } from "@/lib/types";
 import { submitBid } from "@/lib/contractor-api";
 
@@ -56,6 +56,9 @@ function AuctionDetailContent() {
   // Real-time auction
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     setLoading(true);
     const auctionRef = doc(db, "auctions", auctionId);
@@ -93,6 +96,9 @@ function AuctionDetailContent() {
   // Real-time bids from auction_bids collection
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     const bidsQuery = query(collection(db, "auction_bids"), where("auctionId", "==", auctionId));
     const unsubscribe = onSnapshot(

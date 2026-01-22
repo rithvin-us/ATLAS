@@ -33,7 +33,7 @@ import { AgentGuard } from '@/components/agent/agent-guard';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { Auction, Bid, RFQ, deriveAuctionStatus } from '@/lib/types';
 
 function AuctionDetailContent() {
@@ -60,6 +60,9 @@ function AuctionDetailContent() {
   // Load auction and compute status
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     setLoading(true);
     const auctionRef = doc(db, 'auctions', auctionId);
@@ -136,6 +139,9 @@ function AuctionDetailContent() {
   // Real-time bids from centralized auction_bids collection
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     const bidsQuery = query(
       collection(db, 'auction_bids'),

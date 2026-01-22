@@ -8,73 +8,106 @@ body {
 
 @layer base {
   :root {
-    --background: 210 20% 95%;
-    --foreground: 222.2 84% 4.9%;
+    /* New ATLAS Design System - Bold & Premium */
+    --background: 220 15% 97%;
+    --foreground: 220 25% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 25% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 210 75% 50%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 20% 99%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 20% 97%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 180 65% 40%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 210 15% 88%;
-    --input: 210 15% 88%;
-    --ring: 210 75% 50%;
-    --radius: 0.5rem;
-    --chart-1: 210 75% 50%;
-    --chart-2: 180 65% 40%;
-    --chart-3: 30 80% 55%;
+    --popover-foreground: 220 25% 10%;
+    --primary: 220 90% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 220 25% 10%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 90% 56%;
+    --radius: 0.75rem;
+    
+    /* Chart colors */
+    --chart-1: 220 90% 56%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-primary: 210 75% 50%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 20% 94%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 210 15% 88%;
-    --sidebar-ring: 210 75% 50%;
+    
+    /* Sidebar */
+    --sidebar-background: 220 25% 10%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 220 90% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 20% 20%;
+    --sidebar-ring: 220 90% 56%;
+    
+    /* ATLAS Custom Variables */
+    --atlas-slate: 220 25% 10%;
+    --atlas-slate-light: 220 15% 25%;
+    --atlas-surface: 220 15% 97%;
+    --atlas-surface-raised: 0 0% 100%;
+    --atlas-brand: 220 90% 56%;
+    --atlas-brand-muted: 220 70% 95%;
+    --atlas-success: 160 84% 39%;
+    --atlas-success-muted: 160 60% 95%;
+    --atlas-warning: 38 92% 50%;
+    --atlas-warning-muted: 38 70% 95%;
+    --atlas-danger: 0 72% 51%;
+    --atlas-danger-muted: 0 60% 95%;
+    --atlas-purple: 270 70% 60%;
+    --atlas-purple-muted: 270 50% 95%;
+    
+    /* Agent Theme - Control Center */
+    --agent-primary: 220 90% 56%;
+    --agent-surface: 220 20% 14%;
+    --agent-surface-light: 220 18% 20%;
+    --agent-accent: 45 100% 51%;
+    
+    /* Contractor Theme - Task Hub */
+    --contractor-primary: 160 84% 39%;
+    --contractor-surface: 160 20% 98%;
+    --contractor-accent: 220 90% 56%;
   }
+  
   .dark {
-    --background: 210 10% 12%;
-    --foreground: 210 40% 98%;
-    --card: 210 10% 16%;
-    --card-foreground: 210 40% 98%;
-    --popover: 210 10% 12%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 75% 55%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 210 10% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 210 10% 20%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 180 65% 45%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 210 10% 24%;
-    --input: 210 10% 24%;
-    --ring: 210 75% 55%;
-    --chart-1: 210 75% 55%;
-    --chart-2: 180 65% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 210 10% 12%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 75% 55%;
-    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-    --sidebar-accent: 210 10% 20%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 210 10% 24%;
-    --sidebar-ring: 210 75% 55%;
+    --background: 220 20% 8%;
+    --foreground: 220 15% 95%;
+    --card: 220 20% 12%;
+    --card-foreground: 220 15% 95%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 220 15% 95%;
+    --primary: 220 85% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 220 15% 95%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 160 70% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 220 85% 60%;
+    --chart-1: 220 85% 60%;
+    --chart-2: 160 70% 45%;
+    --chart-3: 38 85% 55%;
+    --chart-4: 280 60% 65%;
+    --chart-5: 340 70% 60%;
+    --sidebar-background: 220 25% 6%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 220 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 14%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 220 85% 60%;
   }
 }
 
@@ -85,4 +118,103 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+  /* Agent Control Center Styles */
+  .agent-zone {
+    @apply bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900;
+  }
+  
+  .agent-card {
+    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl;
+  }
+  
+  .agent-card-elevated {
+    @apply bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/30 rounded-2xl shadow-xl shadow-black/20;
+  }
+  
+  .agent-stat-block {
+    @apply bg-slate-800/80 border border-slate-600/30 rounded-xl p-6;
+  }
+  
+  .agent-glow {
+    @apply shadow-lg shadow-blue-500/10;
+  }
+  
+  /* Contractor Task Hub Styles */
+  .contractor-zone {
+    @apply bg-gradient-to-b from-emerald-50 via-white to-slate-50;
+  }
+  
+  .contractor-card {
+    @apply bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .contractor-card-action {
+    @apply bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-2xl hover:border-emerald-300 hover:shadow-lg transition-all duration-300;
+  }
+  
+  .contractor-stat-pill {
+    @apply bg-white border border-slate-200 rounded-full px-4 py-2 inline-flex items-center gap-2;
+  }
+  
+  /* Shared Premium Components */
+  .section-block {
+    @apply rounded-3xl p-8;
+  }
+  
+  .section-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-8;
+  }
+  
+  .status-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  
+  .status-chip-success {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200;
+  }
+  
+  .status-chip-warning {
+    @apply bg-amber-100 text-amber-700 border border-amber-200;
+  }
+  
+  .status-chip-info {
+    @apply bg-blue-100 text-blue-700 border border-blue-200;
+  }
+  
+  .status-chip-danger {
+    @apply bg-red-100 text-red-700 border border-red-200;
+  }
+  
+  .metric-label {
+    @apply text-xs font-medium uppercase tracking-wider text-slate-500;
+  }
+  
+  .metric-value {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  
+  /* Timeline styles */
+  .timeline-item {
+    @apply relative pl-8 pb-6 border-l-2 border-slate-200 last:border-l-transparent last:pb-0;
+  }
+  
+  .timeline-dot {
+    @apply absolute left-0 top-0 w-4 h-4 -translate-x-1/2 rounded-full border-2 border-white;
+  }
+  
+  /* Card clusters */
+  .card-cluster {
+    @apply grid gap-4;
+  }
+  
+  .card-cluster-stacked > * {
+    @apply -mt-2 first:mt-0 relative;
+  }
+  
+  .card-cluster-stacked > *:nth-child(1) { z-index: 30; }
+  .card-cluster-stacked > *:nth-child(2) { z-index: 20; }
+  .card-cluster-stacked > *:nth-child(3) { z-index: 10; }
 }

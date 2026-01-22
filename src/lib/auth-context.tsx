@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase-client';
 import { getUserRole } from '@/lib/auth';
 import { UserRole } from '@/lib/types';
 
@@ -24,6 +24,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      // Firebase not available (SSR or missing config)
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       

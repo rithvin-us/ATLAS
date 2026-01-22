@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AgentGuard } from '@/components/agent/agent-guard';
@@ -23,6 +22,15 @@ import {
   Plus,
   ChevronRight,
   Sparkles,
+  Activity,
+  Target,
+  Zap,
+  BarChart3,
+  Bell,
+  Settings,
+  Search,
+  ExternalLink,
+  PieChart,
 } from 'lucide-react';
 import { Project, RFQ, Auction, Invoice } from '@/lib/types';
 import { MOCK_CONTRACTOR_APPLICATIONS, MOCK_RFQ_RECOMMENDATIONS, computeContractorFitScore } from '@/lib/mock-recommendation-data';
@@ -58,7 +66,6 @@ function DashboardContent() {
         setAuctions(auctionsData);
         setInvoices(invoicesData);
 
-        // Compute contractor fit scores for all applications with RFQ details
         const allScoredApplications = MOCK_CONTRACTOR_APPLICATIONS.map((app) => {
           const mockRfq = MOCK_RFQ_RECOMMENDATIONS.find((r) => r.id === app.rfqId) || MOCK_RFQ_RECOMMENDATIONS[0];
           const { fitScore, explanation, factors } = computeContractorFitScore(app, mockRfq.budget);
@@ -77,7 +84,6 @@ function DashboardContent() {
 
         setAllContractors(allScoredApplications);
         
-        // Set initial selected RFQ to first one with applications
         if (allScoredApplications.length > 0) {
           const firstRfqId = allScoredApplications[0].rfqId;
           setSelectedRFQId(firstRfqId);
@@ -95,7 +101,6 @@ function DashboardContent() {
     loadData();
   }, [user]);
 
-  // Filter contractors when RFQ selection changes
   useEffect(() => {
     if (selectedRFQId === 'all') {
       setRecommendedContractors(allContractors.slice(0, 3));
@@ -107,21 +112,34 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen agent-zone flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-500/30 rounded-full"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute inset-0"></div>
+          </div>
+          <p className="text-slate-400 text-sm font-medium">Loading Control Center...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-          <div className="flex gap-4">
-            <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-red-900">Error Loading Dashboard</h3>
-              <p className="text-red-700 text-sm mt-1">{error}</p>
+      <div className="min-h-screen agent-zone p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="agent-card p-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white text-lg">System Error</h3>
+                <p className="text-slate-400 text-sm mt-1">{error}</p>
+                <Button className="mt-4 bg-red-500 hover:bg-red-600" size="sm">
+                  Retry Connection
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -136,139 +154,164 @@ function DashboardContent() {
   const paidInvoices = invoices.filter(i => i.status === 'paid');
   const activeAuctions = auctions.filter(a => a.status === 'live');
 
-  const quickActions = [
-    { icon: FileText, label: 'Browse RFQs', href: '/agent/rfq', count: activeRFQs.length, color: 'blue' },
-    { icon: Briefcase, label: 'My Projects', href: '/agent/projects', count: activeProjects.length, color: 'green' },
-    { icon: Gavel, label: 'Auctions', href: '/agent/auctions', count: activeAuctions.length, color: 'purple' },
-    { icon: Users, label: 'Vendors', href: '/agent/vendors', count: 0, color: 'orange' },
-  ];
-
-  const totalOutstanding = invoices
-    .filter(i => i.status !== 'paid')
-    .reduce((sum, inv) => sum + inv.totalAmount, 0);
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Hero Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.email?.split("@")[0]}!
-          </h1>
-          <p className="text-gray-600 text-lg">Here's an overview of your procurement management</p>
+    <div className="min-h-screen agent-zone">
+      {/* Top Command Bar */}
+      <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-40">
+        <div className="max-w-[1600px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-white">Control Center</h1>
+                  <p className="text-xs text-slate-400">Agent Dashboard</p>
+                </div>
+              </div>
+              <div className="h-8 w-px bg-slate-700"></div>
+              <div className="flex items-center gap-2">
+                <span className="status-chip status-chip-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  System Online
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input 
+                  type="text" 
+                  placeholder="Search everything..." 
+                  className="w-64 pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                />
+              </div>
+              <button className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                <Bell className="h-5 w-5" />
+              </button>
+              <button className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* Stats Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Active RFQs */}
-        <Card className="hover:shadow-lg transition-shadow border-0">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Active RFQs</p>
-                <p className="text-4xl font-bold text-gray-900">{activeRFQs.length}</p>
-                <p className="text-xs text-gray-500 mt-2">Published & awaiting responses</p>
-              </div>
-              <div className="h-14 w-14 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-                <FileText className="h-7 w-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Active Projects */}
-        <Card className="hover:shadow-lg transition-shadow border-0">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Active Projects</p>
-                <p className="text-4xl font-bold text-gray-900">{activeProjects.length}</p>
-                <p className="text-xs text-gray-500 mt-2">In progress</p>
-              </div>
-              <div className="h-14 w-14 bg-green-100 rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
-                <Briefcase className="h-7 w-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Active Auctions */}
-        <Card className="hover:shadow-lg transition-shadow border-0">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Active Auctions</p>
-                <p className="text-4xl font-bold text-gray-900">{activeAuctions.length}</p>
-                <p className="text-xs text-gray-500 mt-2">Live bidding</p>
-              </div>
-              <div className="h-14 w-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 flex-shrink-0">
-                <Gavel className="h-7 w-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pending Invoices */}
-        <Card className="hover:shadow-lg transition-shadow border-0">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Pending Invoices</p>
-                <p className="text-4xl font-bold text-gray-900">{pendingInvoices.length}</p>
-                <p className="text-xs text-gray-500 mt-2">Awaiting approval</p>
-              </div>
-              <div className="h-14 w-14 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 flex-shrink-0">
-                <DollarSign className="h-7 w-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link key={action.label} href={action.href}>
-                <Card className="border hover:shadow-md transition-all cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center ${
-                      action.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-                      action.color === 'green' ? 'bg-green-100 text-green-600' :
-                      action.color === 'purple' ? 'bg-purple-100 text-purple-600' :
-                      'bg-orange-100 text-orange-600'
-                    }`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-sm">{action.label}</h3>
-                    <div className="flex items-center justify-center gap-1 mt-2 text-gray-500">
-                      <span className="text-xs">Go</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </div>
-                  </CardContent>
-                </Card>
+      <main className="max-w-[1600px] mx-auto px-6 py-8">
+        {/* Welcome Banner */}
+        <div className="agent-card-elevated p-8 mb-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-blue-400 text-sm font-medium mb-2">Welcome back</p>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {user?.email?.split("@")[0]}
+              </h2>
+              <p className="text-slate-400">Your procurement operations at a glance</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link href="/agent/rfq/new">
+                <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2">
+                  <Plus className="h-4 w-4" />
+                  New RFQ
+                </Button>
               </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* AI-Recommended Contractors */}
-      {allContractors.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-green-600" />
-              <h2 className="text-2xl font-bold text-gray-900">Top Applicants for Your RFQs</h2>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">AI Ranked</Badge>
+              <Link href="/agent/projects/new">
+                <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white gap-2">
+                  <Briefcase className="h-4 w-4" />
+                  New Project
+                </Button>
+              </Link>
             </div>
+          </div>
+        </div>
+
+        {/* SECTION 1: Overview Metrics */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <BarChart3 className="h-4 w-4 text-blue-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Overview</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent"></div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Active RFQs */}
+            <div className="agent-stat-block group hover:border-blue-500/50 transition-colors">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                  <FileText className="h-6 w-6 text-blue-400" />
+                </div>
+                <Link href="/agent/rfq" className="text-slate-500 hover:text-blue-400 transition-colors">
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="metric-label text-slate-500">Active RFQs</p>
+              <p className="metric-value text-white">{activeRFQs.length}</p>
+              <p className="text-xs text-slate-500 mt-2">Awaiting responses</p>
+            </div>
+
+            {/* Active Projects */}
+            <div className="agent-stat-block group hover:border-emerald-500/50 transition-colors">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
+                  <Briefcase className="h-6 w-6 text-emerald-400" />
+                </div>
+                <Link href="/agent/projects" className="text-slate-500 hover:text-emerald-400 transition-colors">
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="metric-label text-slate-500">Active Projects</p>
+              <p className="metric-value text-white">{activeProjects.length}</p>
+              <p className="text-xs text-slate-500 mt-2">In progress</p>
+            </div>
+
+            {/* Live Auctions */}
+            <div className="agent-stat-block group hover:border-purple-500/50 transition-colors">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                  <Gavel className="h-6 w-6 text-purple-400" />
+                </div>
+                <Link href="/agent/auctions" className="text-slate-500 hover:text-purple-400 transition-colors">
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="metric-label text-slate-500">Live Auctions</p>
+              <p className="metric-value text-white">{activeAuctions.length}</p>
+              <p className="text-xs text-slate-500 mt-2">Bidding active</p>
+            </div>
+
+            {/* Pending Invoices */}
+            <div className="agent-stat-block group hover:border-amber-500/50 transition-colors">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+                  <DollarSign className="h-6 w-6 text-amber-400" />
+                </div>
+                <Link href="/agent/invoices" className="text-slate-500 hover:text-amber-400 transition-colors">
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="metric-label text-slate-500">Pending Invoices</p>
+              <p className="metric-value text-white">{pendingInvoices.length}</p>
+              <p className="text-xs text-slate-500 mt-2">Needs approval</p>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 2: Active Items - AI Recommendations */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-emerald-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">AI-Ranked Applicants</h2>
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Smart Selection</Badge>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent"></div>
             <select
               value={selectedRFQId}
               onChange={(e) => setSelectedRFQId(e.target.value)}
-              className="h-10 pl-4 pr-6 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-800 text-center [text-align-last:center] shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-50"
+              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
               <option value="all">All RFQs</option>
               {Array.from(new Set(allContractors.map(c => c.rfqId))).map(rfqId => {
@@ -281,317 +324,378 @@ function DashboardContent() {
               })}
             </select>
           </div>
-          <p className="text-gray-600 mb-4">Ranked by fit score based on credibility, bid competitiveness, and delivery history</p>
-          
-          <div className="grid gap-4">
-            {recommendedContractors.map((recommendation: any, index: number) => (
-              <Card
-                key={recommendation.id}
-                className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/30 to-transparent"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex-shrink-0">
-                          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100 text-green-600 font-bold text-sm">
-                            #{index + 1}
+
+          {recommendedContractors.length > 0 ? (
+            <div className="space-y-4">
+              {recommendedContractors.map((rec: any, index: number) => (
+                <div
+                  key={rec.id}
+                  className="agent-card p-6 hover:bg-slate-800/70 transition-all group"
+                >
+                  <div className="flex items-start gap-6">
+                    {/* Rank Badge */}
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                      index === 0 ? 'bg-gradient-to-br from-amber-500 to-amber-600' :
+                      index === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-500' :
+                      'bg-gradient-to-br from-amber-700 to-amber-800'
+                    }`}>
+                      <span className="text-xl font-bold text-white">#{index + 1}</span>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                            {rec.contractor.name}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">
+                              {rec.rfqInfo.title}
+                            </span>
                           </div>
                         </div>
-                        <h3 className="font-semibold text-lg text-gray-900">
-                          {recommendation.contractor.name}
-                        </h3>
-                        <Badge className="bg-green-600">
-                          {recommendation.fitScore}% Fit
-                        </Badge>
-                      </div>
-
-                      {/* RFQ Information */}
-                      <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-200">
-                        <div className="flex items-center gap-2 text-xs">
-                          <FileText className="h-3 w-3 text-blue-600" />
-                          <span className="font-medium text-blue-900">{recommendation.rfqInfo.title}</span>
-                          <span className="text-gray-400">•</span>
-                          <span className="text-gray-600">{recommendation.rfqInfo.projectName}</span>
-                          <span className="text-gray-400">•</span>
-                          <span className="text-gray-500">ID: {recommendation.rfqInfo.id}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-emerald-400">{rec.fitScore}%</p>
+                            <p className="text-xs text-slate-500">Fit Score</p>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Key Metrics */}
-                      <div className="flex gap-4 mb-3 text-sm">
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4 text-blue-600" />
-                          Bid: ${recommendation.bidAmount.toLocaleString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          {recommendation.contractor.completionRate}% completion
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <TrendingUp className="h-4 w-4 text-purple-600" />
-                          Rating: {recommendation.contractor.averageRating}/5
-                        </span>
-                      </div>
-
-                      {/* Explanation */}
-                      <p className="text-sm text-gray-700 mb-3 font-medium text-green-700">
-                        ✓ {recommendation.explanation}
-                      </p>
-
-                      {/* Fit Score Factors */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Credibility</div>
-                          <div className="text-lg font-bold text-purple-600">{recommendation.factors.credibility}%</div>
+                      {/* Metrics Grid */}
+                      <div className="grid grid-cols-6 gap-3 mb-4">
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-purple-400">{rec.factors.credibility}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Credibility</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Bid Fit</div>
-                          <div className="text-lg font-bold text-blue-600">{recommendation.factors.bidCompetitiveness}%</div>
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-blue-400">{rec.factors.bidCompetitiveness}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Bid Fit</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Delivery</div>
-                          <div className="text-lg font-bold text-green-600">{recommendation.factors.deliveryHistory}%</div>
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-emerald-400">{rec.factors.deliveryHistory}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Delivery</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Skills</div>
-                          <div className="text-lg font-bold text-yellow-600">{recommendation.factors.skillMatch}%</div>
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-amber-400">{rec.factors.skillMatch}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Skills</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Compliance</div>
-                          <div className="text-lg font-bold text-emerald-600">{recommendation.factors.compliance}%</div>
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-teal-400">{rec.factors.compliance}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Compliance</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <div className="text-xs text-gray-600">Experience</div>
-                          <div className="text-lg font-bold text-indigo-600">{recommendation.factors.pastPerformance}%</div>
+                        <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+                          <p className="text-lg font-bold text-indigo-400">{rec.factors.pastPerformance}%</p>
+                          <p className="text-[10px] text-slate-500 uppercase">Experience</p>
                         </div>
                       </div>
 
-                      {/* Additional Info */}
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <div className="text-xs text-gray-600">
-                          {recommendation.contractor.totalProjects} projects completed • {recommendation.contractor.yearsInBusiness} years in business • {recommendation.deliveryHistory.onTimePercentage}% on-time delivery
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recent RFQs Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Recent RFQs</h2>
-          <Link href="/agent/rfq">
-            <Button variant="outline" size="sm">
-              View All <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
-          </Link>
-        </div>
-
-        {rfqs.length === 0 ? (
-          <Card className="border-dashed border-2 border-gray-300">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <FileText className="h-12 w-12 text-gray-300 mb-4" />
-              <p className="text-gray-600 font-medium">No RFQs published</p>
-              <p className="text-gray-500 text-sm mt-1">Create RFQs to request quotations from vendors</p>
-              <Link href="/agent/rfq/new">
-                <Button className="mt-4" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create RFQ
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {rfqs.slice(0, 3).map((rfq) => (
-              <Link key={rfq.id} href={`/agent/rfq/${rfq.id}`}>
-                <Card className="hover:shadow-md transition-shadow border-0 cursor-pointer">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900">{rfq.title}</h3>
-                          <Badge variant={rfq.status === 'published' ? 'default' : 'secondary'} className="text-xs">
-                            {rfq.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 line-clamp-1">{rfq.description}</p>
-                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {new Date(rfq.deadline).toLocaleDateString()}
-                          </span>
-                          {rfq.budget && (
-                            <span>${rfq.budget.toLocaleString()}</span>
-                          )}
-                          <Badge variant="outline" className="text-xs">{rfq.responses?.length || 0} responses</Badge>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Two Column Layout: Projects & Invoices */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        {/* Active Projects */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Active Projects</h2>
-            <Link href="/agent/projects">
-              <Button variant="ghost" size="sm">
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-
-          {projects.length === 0 ? (
-            <Card className="border-dashed border-2 border-gray-300">
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <Briefcase className="h-10 w-10 text-gray-300 mb-3" />
-                <p className="text-gray-600 font-medium text-sm">No projects yet</p>
-                <Link href="/agent/projects/new">
-                  <Button className="mt-3" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Project
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {activeProjects.slice(0, 4).map((project) => (
-                <Link key={project.id} href={`/agent/projects/${project.id}`}>
-                  <Card className="hover:shadow-md transition-shadow border-0 cursor-pointer">
-                    <CardContent className="p-4">
+                      {/* Bottom Info */}
                       <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 text-sm">{project.name}</h3>
-                          <p className="text-xs text-gray-600 mt-1">{project.siteDetails?.location}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="text-xs">{project.status}</Badge>
-                            <span className="text-xs text-gray-500">{project.milestones?.length || 0} milestones</span>
-                          </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <DollarSign className="h-4 w-4 text-blue-400" />
+                            Bid: ${rec.bidAmount.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <CheckCircle className="h-4 w-4 text-emerald-400" />
+                            {rec.contractor.completionRate}% completion
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <TrendingUp className="h-4 w-4 text-purple-400" />
+                            {rec.contractor.averageRating}/5 rating
+                          </span>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                        <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-blue-400 transition-colors" />
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
+          ) : (
+            <div className="agent-card p-12 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-slate-800 mx-auto mb-4 flex items-center justify-center">
+                <Users className="h-8 w-8 text-slate-600" />
+              </div>
+              <p className="text-slate-400">No applicants to display</p>
+            </div>
           )}
-        </div>
+        </section>
 
-        {/* Invoice Summary */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Invoice Summary</h2>
-            <Link href="/agent/invoices">
-              <Button variant="ghost" size="sm">
-                View All <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+        {/* SECTION 3: Quick Actions Grid */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Zap className="h-4 w-4 text-purple-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Quick Actions</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent"></div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/agent/rfq" className="group">
+              <div className="agent-card p-6 text-center hover:bg-slate-800/70 transition-all hover:border-blue-500/50">
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/20 mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-500/30 group-hover:scale-110 transition-all">
+                  <FileText className="h-7 w-7 text-blue-400" />
+                </div>
+                <h3 className="font-semibold text-white mb-1">Browse RFQs</h3>
+                <p className="text-xs text-slate-500">{activeRFQs.length} active</p>
+              </div>
+            </Link>
+
+            <Link href="/agent/projects" className="group">
+              <div className="agent-card p-6 text-center hover:bg-slate-800/70 transition-all hover:border-emerald-500/50">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 mx-auto mb-4 flex items-center justify-center group-hover:bg-emerald-500/30 group-hover:scale-110 transition-all">
+                  <Briefcase className="h-7 w-7 text-emerald-400" />
+                </div>
+                <h3 className="font-semibold text-white mb-1">My Projects</h3>
+                <p className="text-xs text-slate-500">{activeProjects.length} active</p>
+              </div>
+            </Link>
+
+            <Link href="/agent/auctions" className="group">
+              <div className="agent-card p-6 text-center hover:bg-slate-800/70 transition-all hover:border-purple-500/50">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/20 mx-auto mb-4 flex items-center justify-center group-hover:bg-purple-500/30 group-hover:scale-110 transition-all">
+                  <Gavel className="h-7 w-7 text-purple-400" />
+                </div>
+                <h3 className="font-semibold text-white mb-1">Auctions</h3>
+                <p className="text-xs text-slate-500">{activeAuctions.length} live</p>
+              </div>
+            </Link>
+
+            <Link href="/agent/vendors" className="group">
+              <div className="agent-card p-6 text-center hover:bg-slate-800/70 transition-all hover:border-amber-500/50">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/20 mx-auto mb-4 flex items-center justify-center group-hover:bg-amber-500/30 group-hover:scale-110 transition-all">
+                  <Users className="h-7 w-7 text-amber-400" />
+                </div>
+                <h3 className="font-semibold text-white mb-1">Vendors</h3>
+                <p className="text-xs text-slate-500">Manage vendors</p>
+              </div>
             </Link>
           </div>
+        </section>
 
-          <div className="space-y-3">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-0">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-blue-700 font-medium">Pending Approval</p>
-                    <p className="text-3xl font-bold text-blue-900 mt-1">{pendingInvoices.length}</p>
-                    <p className="text-xs text-blue-600 mt-1">Needs review</p>
+        {/* SECTION 4: Two Column - RFQs & Projects */}
+        <section className="mb-12">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Recent RFQs */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-blue-400" />
                   </div>
-                  <Clock className="h-12 w-12 text-blue-200" />
+                  <h2 className="text-lg font-bold text-white">Recent RFQs</h2>
                 </div>
-              </CardContent>
-            </Card>
+                <Link href="/agent/rfq">
+                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                    View All <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-0">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-purple-700 font-medium">Approved</p>
-                    <p className="text-3xl font-bold text-purple-900 mt-1">{approvedInvoices.length}</p>
-                    <p className="text-xs text-purple-600 mt-1">Ready for payment</p>
-                  </div>
-                  <CheckCircle className="h-12 w-12 text-purple-200" />
+              {rfqs.length === 0 ? (
+                <div className="agent-card border-dashed border-2 border-slate-700 p-8 text-center">
+                  <FileText className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                  <p className="text-slate-400 mb-4">No RFQs published yet</p>
+                  <Link href="/agent/rfq/new">
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-500">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create RFQ
+                    </Button>
+                  </Link>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-0">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-700 font-medium">Paid</p>
-                    <p className="text-3xl font-bold text-green-900 mt-1">{paidInvoices.length}</p>
-                    <p className="text-xs text-green-600 mt-1">${(paidInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0) / 100).toLocaleString()} total</p>
-                  </div>
-                  <DollarSign className="h-12 w-12 text-green-200" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-        <Card className="border-0">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {activeProjects.length > 0 && (
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-blue-50 border border-blue-100">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{activeProjects.length} project{activeProjects.length !== 1 ? 's' : ''} in progress</p>
-                    <p className="text-xs text-gray-600 mt-1">Monitor milestones and contractor progress</p>
-                  </div>
-                </div>
-              )}
-              {pendingInvoices.length > 0 && (
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-yellow-50 border border-yellow-100">
-                  <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{pendingInvoices.length} invoice{pendingInvoices.length !== 1 ? 's' : ''} pending approval</p>
-                    <p className="text-xs text-gray-600 mt-1">Review and approve contractor invoices</p>
-                  </div>
-                </div>
-              )}
-              {activeRFQs.length > 0 && (
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-purple-50 border border-purple-100">
-                  <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <FileText className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{activeRFQs.length} active RFQ{activeRFQs.length !== 1 ? 's' : ''}</p>
-                    <p className="text-xs text-gray-600 mt-1">Awaiting vendor responses and quotations</p>
-                  </div>
+              ) : (
+                <div className="space-y-3">
+                  {rfqs.slice(0, 3).map((rfq) => (
+                    <Link key={rfq.id} href={`/agent/rfq/${rfq.id}`}>
+                      <div className="agent-card p-4 hover:bg-slate-800/70 transition-all group cursor-pointer">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-medium text-white truncate group-hover:text-blue-400 transition-colors">{rfq.title}</h3>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-[10px] ${rfq.status === 'published' ? 'border-emerald-500/50 text-emerald-400' : 'border-slate-600 text-slate-400'}`}
+                              >
+                                {rfq.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-slate-500 line-clamp-1">{rfq.description}</p>
+                            <div className="flex items-center gap-4 mt-3">
+                              <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(rfq.deadline).toLocaleDateString()}
+                              </span>
+                              {rfq.budget && (
+                                <span className="text-xs text-slate-500">
+                                  ${rfq.budget.toLocaleString()}
+                                </span>
+                              )}
+                              <Badge variant="outline" className="text-[10px] border-slate-700 text-slate-500">
+                                {rfq.responses?.length || 0} responses
+                              </Badge>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-blue-400 transition-colors flex-shrink-0 ml-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            {/* Active Projects */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <Briefcase className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <h2 className="text-lg font-bold text-white">Active Projects</h2>
+                </div>
+                <Link href="/agent/projects">
+                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                    View All <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+
+              {projects.length === 0 ? (
+                <div className="agent-card border-dashed border-2 border-slate-700 p-8 text-center">
+                  <Briefcase className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                  <p className="text-slate-400 mb-4">No projects yet</p>
+                  <Link href="/agent/projects/new">
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeProjects.slice(0, 4).map((project) => (
+                    <Link key={project.id} href={`/agent/projects/${project.id}`}>
+                      <div className="agent-card p-4 hover:bg-slate-800/70 transition-all group cursor-pointer">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-white truncate group-hover:text-emerald-400 transition-colors">{project.name}</h3>
+                            <p className="text-xs text-slate-500 mt-1">{project.siteDetails?.location}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="outline" className="text-[10px] border-emerald-500/50 text-emerald-400">
+                                {project.status}
+                              </Badge>
+                              <span className="text-xs text-slate-500">
+                                {project.milestones?.length || 0} milestones
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-emerald-400 transition-colors flex-shrink-0 ml-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 5: Insights - Invoice Summary + Activity */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <PieChart className="h-4 w-4 text-amber-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Insights</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent"></div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Invoice Summary Cards */}
+            <div className="agent-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-white">Invoice Pipeline</h3>
+                <Link href="/agent/invoices" className="text-blue-400 text-sm hover:underline">View all</Link>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm text-slate-300">Pending</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-400">{pendingInvoices.length}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-purple-400" />
+                    <span className="text-sm text-slate-300">Approved</span>
+                  </div>
+                  <span className="text-xl font-bold text-purple-400">{approvedInvoices.length}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="h-5 w-5 text-emerald-400" />
+                    <span className="text-sm text-slate-300">Paid</span>
+                  </div>
+                  <span className="text-xl font-bold text-emerald-400">{paidInvoices.length}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Timeline */}
+            <div className="lg:col-span-2 agent-card p-6">
+              <h3 className="font-medium text-white mb-4">Recent Activity</h3>
+              <div className="space-y-1">
+                {activeProjects.length > 0 && (
+                  <div className="timeline-item">
+                    <div className="timeline-dot bg-blue-500"></div>
+                    <div className="flex items-start gap-3 p-3 bg-blue-500/10 rounded-xl">
+                      <Activity className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-white">{activeProjects.length} project{activeProjects.length !== 1 ? 's' : ''} in progress</p>
+                        <p className="text-xs text-slate-500 mt-1">Monitor milestones and contractor progress</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {pendingInvoices.length > 0 && (
+                  <div className="timeline-item">
+                    <div className="timeline-dot bg-amber-500"></div>
+                    <div className="flex items-start gap-3 p-3 bg-amber-500/10 rounded-xl">
+                      <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-white">{pendingInvoices.length} invoice{pendingInvoices.length !== 1 ? 's' : ''} pending approval</p>
+                        <p className="text-xs text-slate-500 mt-1">Review and approve contractor invoices</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {activeRFQs.length > 0 && (
+                  <div className="timeline-item">
+                    <div className="timeline-dot bg-purple-500"></div>
+                    <div className="flex items-start gap-3 p-3 bg-purple-500/10 rounded-xl">
+                      <FileText className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-white">{activeRFQs.length} active RFQ{activeRFQs.length !== 1 ? 's' : ''}</p>
+                        <p className="text-xs text-slate-500 mt-1">Awaiting vendor responses and quotations</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {activeProjects.length === 0 && pendingInvoices.length === 0 && activeRFQs.length === 0 && (
+                  <div className="text-center py-8">
+                    <Activity className="h-12 w-12 text-slate-700 mx-auto mb-3" />
+                    <p className="text-slate-500">No recent activity</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

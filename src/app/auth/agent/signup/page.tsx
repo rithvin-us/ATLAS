@@ -57,40 +57,46 @@ export default function AgentSignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Agent Registration</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mint-50 via-mint-100 to-base p-4 py-8 relative overflow-hidden">
+      {/* Decorative circles */}
+      <div className="absolute top-10 right-10 w-32 h-32 bg-mint-200 rounded-full opacity-30 blur-xl"></div>
+      <div className="absolute bottom-10 left-10 w-40 h-40 bg-coral-200 rounded-full opacity-30 blur-xl"></div>
+      
+      <Card className="w-full max-w-2xl border-0 shadow-card rounded-2xl relative z-10">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="text-3xl font-bold text-gray-900">Agent Registration</CardTitle>
+          <CardDescription className="text-base text-gray-500">
             Create your organization account and upload verification documents
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="org-name">Organization Name</Label>
+                <Label htmlFor="org-name" className="text-sm font-semibold text-gray-700">Organization Name</Label>
                 <Input
                   id="org-name"
                   placeholder="Company Inc."
                   value={formData.orgName}
                   onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
                   required
+                  className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="admin-name">Admin Name</Label>
+                <Label htmlFor="admin-name" className="text-sm font-semibold text-gray-700">Admin Name</Label>
                 <Input
                   id="admin-name"
                   placeholder="John Doe"
                   value={formData.adminName}
                   onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                   required
+                  className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Admin Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Admin Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -98,10 +104,11 @@ export default function AgentSignupPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -109,37 +116,50 @@ export default function AgentSignupPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
+                className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="address">Organization Address</Label>
+              <Label htmlFor="address" className="text-sm font-semibold text-gray-700">Organization Address</Label>
               <Textarea
                 id="address"
                 placeholder="Full address of your organization"
                 rows={3}
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="documents">Company Documents</Label>
+              <Label htmlFor="documents" className="text-sm font-semibold text-gray-700">Company Documents</Label>
               <Input
                 id="documents"
                 type="file"
                 multiple
                 accept=".pdf,.doc,.docx"
+                className="rounded-xl border-mint-200"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500">
                 Upload registration certificates, tax documents, and other verification documents
               </p>
             </div>
-            <Button className="w-full" size="lg" type="submit" disabled={loading}>
+            <Button 
+              className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-mint to-mint-dark hover:from-mint-dark hover:to-mint-dark shadow-soft hover:shadow-soft-lg transition-all" 
+              size="lg" 
+              type="submit" 
+              disabled={loading}
+            >
               {loading ? 'Creating account...' : 'Register & Submit for Verification'}
             </Button>
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
-              <Link href="/auth/agent/login" className="text-primary hover:underline">
+            <div className="text-center text-sm pt-2">
+              <span className="text-gray-600">Already have an account? </span>
+              <Link href="/auth/agent/login" className="text-mint-dark font-semibold hover:text-coral-dark hover:underline">
                 Sign in
+              </Link>
+            </div>
+            <div className="text-center pt-2">
+              <Link href="/" className="text-sm text-gray-500 hover:text-mint-dark hover:underline">
+                ← Back to home
               </Link>
             </div>
           </form>

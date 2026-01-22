@@ -45,7 +45,7 @@ import { AgentGuard } from '@/components/agent/agent-guard';
 import { useAuth } from '@/lib/auth-context';
 import { MOCK_CONTRACTOR_APPLICATIONS, computeContractorFitScore, MOCK_RFQ_RECOMMENDATIONS } from '@/lib/mock-recommendation-data';
 import { doc, getDoc, updateDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { Auction, Bid } from '@/lib/types';
 
 function AuctionDetailContent() {
@@ -65,6 +65,9 @@ function AuctionDetailContent() {
   // Real-time auction updates
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     setLoading(true);
     const auctionRef = doc(db, 'auctions', auctionId);
@@ -106,6 +109,9 @@ function AuctionDetailContent() {
   // Real-time bids updates from auction_bids collection
   useEffect(() => {
     if (!user || !auctionId) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     const bidsQuery = query(
       collection(db, 'auction_bids'),
@@ -162,6 +168,9 @@ function AuctionDetailContent() {
 
   const handleStatusChange = async (newStatus: string) => {
     if (!auction) return;
+
+    const db = getFirebaseDb();
+    if (!db) return;
 
     try {
       setUpdating(true);

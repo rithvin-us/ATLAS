@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { NotificationItem } from '@/components/notifications';
 import { collection, query, where, onSnapshot, Timestamp, limit, orderBy } from 'firebase/firestore';
 
@@ -10,6 +10,12 @@ export function useNotifications(userId: string, userType: 'agent' | 'contractor
 
   useEffect(() => {
     if (!userId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const db = getFirebaseDb();
+    if (!db) {
       setIsLoading(false);
       return;
     }

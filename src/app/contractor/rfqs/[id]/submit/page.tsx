@@ -19,7 +19,7 @@ import {
 import { ContractorGuard } from '@/components/contractor/contractor-guard';
 import { useAuth } from '@/lib/auth-context';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { submitRFQResponse } from '@/lib/contractor-api';
 import { RFQ, Question } from '@/lib/types';
 
@@ -43,6 +43,9 @@ function SubmitRFQResponseContent() {
   useEffect(() => {
     async function loadRFQ() {
       if (!user) return;
+
+      const db = getFirebaseDb();
+      if (!db) return;
 
       try {
         setLoading(true);

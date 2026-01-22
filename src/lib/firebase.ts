@@ -1,19 +1,28 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+/**
+ * Firebase Configuration Module
+ * 
+ * IMPORTANT: This module is designed to be safely imported during SSR/build.
+ * All Firebase initialization is deferred and guarded with typeof window checks.
+ * 
+ * For client-only code, prefer importing from '@/lib/firebase-client' directly.
+ */
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+// Re-export everything from the client module for backward compatibility
+// These functions are safe to call - they return null during SSR
+export { 
+  getFirebaseApp, 
+  getFirebaseAuth, 
+  getFirebaseDb,
+  type FirebaseApp,
+  type Auth,
+  type Firestore
+} from './firebase-client';
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Null-safe stubs for server-side rendering
+// These are explicitly null during build/SSR
+export const app = typeof window === 'undefined' ? null : undefined;
+export const auth = typeof window === 'undefined' ? null : undefined;
+export const db = typeof window === 'undefined' ? null : undefined;
+export const safeAuth = null;
+export const safeDb = null;
 
-export { app, auth, db };

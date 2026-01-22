@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getFirebaseDb } from './firebase-client';
 import {
   collection,
   doc,
@@ -12,6 +12,7 @@ import {
   orderBy,
   serverTimestamp,
   Timestamp,
+  Firestore,
 } from 'firebase/firestore';
 import {
   Project,
@@ -24,6 +25,15 @@ import {
   Vendor,
   ComplianceDocument,
 } from './types';
+
+// Helper to get db with null check
+function getDb(): Firestore {
+  const db = getFirebaseDb();
+  if (!db) {
+    throw new Error('Firebase Firestore not initialized. This function must be called on the client side.');
+  }
+  return db;
+}
 
 // ============================================================================
 // Utility: Convert Firestore Timestamp to Date
@@ -47,7 +57,7 @@ const toDate = (timestamp: any): Date => {
  * (status = 'published' and not expired)
  */
 export async function fetchEligibleRFQs(contractorId: string): Promise<RFQ[]> {
-  const rfqsRef = collection(db, 'rfqs');
+  const rfqsRef = collection(getDb(), 'rfqs');
   const q = query(
     rfqsRef,
     where('status', '==', 'published'),
@@ -73,7 +83,7 @@ export async function fetchEligibleRFQs(contractorId: string): Promise<RFQ[]> {
  * Fetch RFQs where the contractor has already submitted a response
  */
 export async function fetchContractorRFQResponses(contractorId: string): Promise<RFQ[]> {
-  const rfqsRef = collection(db, 'rfqs');
+  const rfqsRef = collection(getDb(), 'rfqs');
   const q = query(rfqsRef, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
 
@@ -96,7 +106,7 @@ export async function fetchContractorRFQResponses(contractorId: string): Promise
  * Fetch projects where the contractor is assigned
  */
 export async function fetchContractorProjects(contractorId: string): Promise<Project[]> {
-  const projectsRef = collection(db, 'projects');
+  const projectsRef = collection(getDb(), 'projects');
   const q = query(
     projectsRef,
     where('contractorId', '==', contractorId),
@@ -124,7 +134,7 @@ export async function fetchContractorProjects(contractorId: string): Promise<Pro
  * (status = 'active' or contractor has already placed a bid)
  */
 export async function fetchContractorAuctions(contractorId: string): Promise<Auction[]> {
-  const auctionsRef = collection(db, 'auctions');
+  const auctionsRef = collection(getDb(), 'auctions');
   const q = query(auctionsRef, orderBy('startDate', 'desc'));
   const snapshot = await getDocs(q);
 
@@ -150,7 +160,7 @@ export async function fetchContractorAuctions(contractorId: string): Promise<Auc
  * Fetch invoices created by the contractor
  */
 export async function fetchContractorInvoices(contractorId: string): Promise<Invoice[]> {
-  const invoicesRef = collection(db, 'invoices');
+  const invoicesRef = collection(getDb(), 'invoices');
   const q = query(
     invoicesRef,
     where('contractorId', '==', contractorId),
@@ -174,7 +184,7 @@ export async function fetchContractorInvoices(contractorId: string): Promise<Inv
  * Fetch a single RFQ by ID
  */
 export async function fetchRFQ(rfqId: string): Promise<RFQ | null> {
-  const rfqRef = doc(db, 'rfqs', rfqId);
+  const rfqRef = doc(getDb(), 'rfqs', rfqId);
   const rfqSnap = await getDoc(rfqRef);
 
   if (!rfqSnap.exists()) {
@@ -194,7 +204,7 @@ export async function fetchRFQ(rfqId: string): Promise<RFQ | null> {
  * Fetch a single project by ID
  */
 export async function fetchProject(projectId: string): Promise<Project | null> {
-  const projectRef = doc(db, 'projects', projectId);
+  const projectRef = doc(getDb(), 'projects', projectId);
   const projectSnap = await getDoc(projectRef);
 
   if (!projectSnap.exists()) {
@@ -218,7 +228,7 @@ export async function fetchProject(projectId: string): Promise<Project | null> {
  * Fetch a single auction by ID
  */
 export async function fetchAuction(auctionId: string): Promise<Auction | null> {
-  const auctionRef = doc(db, 'auctions', auctionId);
+  const auctionRef = doc(getDb(), 'auctions', auctionId);
   const auctionSnap = await getDoc(auctionRef);
 
   if (!auctionSnap.exists()) {
@@ -239,7 +249,7 @@ export async function fetchAuction(auctionId: string): Promise<Auction | null> {
  * Fetch a single invoice by ID
  */
 export async function fetchInvoice(invoiceId: string): Promise<Invoice | null> {
-  const invoiceRef = doc(db, 'invoices', invoiceId);
+  const invoiceRef = doc(getDb(), 'invoices', invoiceId);
   const invoiceSnap = await getDoc(invoiceRef);
 
   if (!invoiceSnap.exists()) {
@@ -262,7 +272,7 @@ export async function fetchInvoice(invoiceId: string): Promise<Invoice | null> {
 export async function fetchContractorCredibility(
   contractorId: string
 ): Promise<CredibilityScore | null> {
-  const credRef = doc(db, 'credibilityScores', contractorId);
+  const credRef = doc(getDb(), 'credibilityScores', contractorId);
   const credSnap = await getDoc(credRef);
 
   if (!credSnap.exists()) {
@@ -285,7 +295,7 @@ export async function fetchContractorCredibility(
  * Fetch the contractor's vendor profile
  */
 export async function fetchContractorProfile(contractorId: string): Promise<Vendor | null> {
-  const vendorRef = doc(db, 'vendors', contractorId);
+  const vendorRef = doc(getDb(), 'vendors', contractorId);
   const vendorSnap = await getDoc(vendorRef);
 
   if (!vendorSnap.exists()) {
@@ -311,7 +321,7 @@ export async function submitRFQResponse(
   rfqId: string,
   response: Omit<RFQResponse, 'id' | 'submittedAt'>
 ): Promise<void> {
-  const rfqRef = doc(db, 'rfqs', rfqId);
+  const rfqRef = doc(getDb(), 'rfqs', rfqId);
   const rfqSnap = await getDoc(rfqRef);
 
   if (!rfqSnap.exists()) {
@@ -339,7 +349,7 @@ export async function submitBid(
   auctionId: string,
   bid: Omit<Bid, 'id' | 'submittedAt'>
 ): Promise<void> {
-  const auctionRef = doc(db, 'auctions', auctionId);
+  const auctionRef = doc(getDb(), 'auctions', auctionId);
   const auctionSnap = await getDoc(auctionRef);
 
   if (!auctionSnap.exists()) {
@@ -365,7 +375,7 @@ export async function submitBid(
   }
 
   // Get contractor info for credibility score
-  const contractorRef = doc(db, 'contractors', bid.contractorId);
+  const contractorRef = doc(getDb(), 'contractors', bid.contractorId);
   const contractorSnap = await getDoc(contractorRef);
   let credibilityScore = 0;
   let contractorName = 'Unknown';
@@ -386,7 +396,7 @@ export async function submitBid(
   };
 
   // Store bid in separate auction_bids collection
-  const bidRef = doc(db, 'auction_bids', bidId);
+  const bidRef = doc(getDb(), 'auction_bids', bidId);
   await setDoc(bidRef, {
     ...newBid,
     submittedAt: now,
@@ -398,7 +408,7 @@ export async function submitBid(
  */
 export async function fetchAuctionBids(auctionId: string): Promise<Bid[]> {
   const bidsQuery = query(
-    collection(db, 'auction_bids'),
+    collection(getDb(), 'auction_bids'),
     where('auctionId', '==', auctionId)
   );
   
@@ -426,7 +436,7 @@ export async function fetchAuctionBids(auctionId: string): Promise<Bid[]> {
  */
 export async function fetchMyAuctionBids(auctionId: string, contractorId: string): Promise<Bid[]> {
   const bidsQuery = query(
-    collection(db, 'auction_bids'),
+    collection(getDb(), 'auction_bids'),
     where('auctionId', '==', auctionId),
     where('contractorId', '==', contractorId)
   );
@@ -458,7 +468,7 @@ export async function createInvoice(
 ): Promise<string> {
   // Validate that the milestone is approved
   if (payload.milestoneId) {
-    const projectRef = doc(db, 'projects', payload.projectId);
+    const projectRef = doc(getDb(), 'projects', payload.projectId);
     const projectSnap = await getDoc(projectRef);
 
     if (!projectSnap.exists()) {
@@ -477,7 +487,7 @@ export async function createInvoice(
     }
   }
 
-  const invoicesRef = collection(db, 'invoices');
+  const invoicesRef = collection(getDb(), 'invoices');
   const docRef = await addDoc(invoicesRef, {
     ...payload,
     createdAt: serverTimestamp(),
@@ -493,7 +503,7 @@ export async function updateComplianceDocument(
   contractorId: string,
   document: any
 ): Promise<void> {
-  const vendorRef = doc(db, 'vendors', contractorId);
+  const vendorRef = doc(getDb(), 'vendors', contractorId);
   const vendorSnap = await getDoc(vendorRef);
 
   if (!vendorSnap.exists()) {
@@ -518,6 +528,6 @@ export async function updateContractorProfile(
   contractorId: string,
   updates: Partial<Vendor>
 ): Promise<void> {
-  const vendorRef = doc(db, 'vendors', contractorId);
+  const vendorRef = doc(getDb(), 'vendors', contractorId);
   await updateDoc(vendorRef, updates);
 }

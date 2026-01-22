@@ -15,8 +15,9 @@ import {
   onSnapshot,
   Timestamp,
   writeBatch,
+  Firestore,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { getFirebaseDb } from './firebase-client';
 import {
   Project,
   Milestone,
@@ -24,6 +25,15 @@ import {
   canTransitionMilestoneState,
   Invoice,
 } from './types';
+
+// Helper to get db with null check
+function getDb(): Firestore {
+  const db = getFirebaseDb();
+  if (!db) {
+    throw new Error('Firebase Firestore not initialized. This function must be called on the client side.');
+  }
+  return db;
+}
 
 // ============================================================================
 // PROJECT MANAGEMENT
@@ -39,7 +49,7 @@ export async function createProjectFromAuction(
   projectData: Partial<Project>
 ): Promise<Project> {
   try {
-    const projectRef = doc(collection(db, 'projects'));
+    const projectRef = doc(collection(getDb(), 'projects'));
     const newProject: Project = {
       id: projectRef.id,
       name: projectData.name || `Project ${projectRef.id.slice(0, 8)}`,
@@ -75,7 +85,7 @@ export async function createProjectFromAuction(
  */
 export async function fetchContractorProjects(contractorId: string): Promise<Project[]> {
   try {
-    const q = query(collection(db, 'projects'), where('contractorId', '==', contractorId));
+    const q = query(collection(getDb(), 'projects'), where('contractorId', '==', contractorId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({
       ...doc.data(),
@@ -94,7 +104,7 @@ export async function fetchContractorProjects(contractorId: string): Promise<Pro
  */
 export async function fetchAgentProjects(agentId: string): Promise<Project[]> {
   try {
-    const q = query(collection(db, 'projects'), where('agentId', '==', agentId));
+    const q = query(collection(getDb(), 'projects'), where('agentId', '==', agentId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({
       ...doc.data(),
@@ -117,7 +127,7 @@ export function subscribeToProject(
   onError: (error: Error) => void
 ) {
   try {
-    const projectRef = doc(db, 'projects', projectId);
+    const projectRef = doc(getDb(), 'projects', projectId);
     return onSnapshot(
       projectRef,
       (snap) => {
@@ -173,8 +183,8 @@ export async function createContractorMilestone(
   }
 ): Promise<Milestone> {
   try {
-    const batch = writeBatch(db);
-    const milestoneRef = doc(collection(db, 'milestones'));
+    const batch = writeBatch(getDb());
+    const milestoneRef = doc(collection(getDb(), 'milestones'));
     
     const startDate = new Date();
     const dueDate = new Date(startDate);
@@ -202,7 +212,7 @@ export async function createContractorMilestone(
     batch.set(milestoneRef, milestone);
 
     // Update project with new milestone
-    const projectRef = doc(db, 'projects', projectId);
+    const projectRef = doc(getDb(), 'projects', projectId);
     const projectSnap = await getDoc(projectRef);
     if (projectSnap.exists()) {
       const projectData = projectSnap.data();
@@ -229,11 +239,11 @@ export async function createMilestones(
   milestonesData: Omit<Milestone, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>[]
 ): Promise<Milestone[]> {
   try {
-    const batch = writeBatch(db);
+    const batch = writeBatch(getDb());
     const createdMilestones: Milestone[] = [];
 
     for (const data of milestonesData) {
-      const milestoneRef = doc(collection(db, 'milestones'));
+      const milestoneRef = doc(collection(getDb(), 'milestones'));
       const milestone: Milestone = {
         id: milestoneRef.id,
         projectId,
@@ -258,7 +268,7 @@ export async function createMilestones(
     }
 
     // Add milestones to project
-    const projectRef = doc(db, 'projects', projectId);
+    const projectRef = doc(getDb(), 'projects', projectId);
     batch.update(projectRef, {
       milestones: createdMilestones,
       updatedAt: new Date(),
@@ -277,7 +287,7 @@ export async function createMilestones(
  */
 export async function fetchProjectMilestones(projectId: string): Promise<Milestone[]> {
   try {
-    const q = query(collection(db, 'milestones'), where('projectId', '==', projectId));
+    const q = query(collection(getDb(), 'milestones'), where('projectId', '==', projectId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs
       .map((doc) => {
@@ -309,7 +319,7 @@ export async function agentApproveMilestone(
   notes?: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -348,7 +358,7 @@ export async function agentRejectMilestone(
   reason: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -387,7 +397,7 @@ export async function agentRequestMilestoneRevision(
   revisionNotes: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -425,7 +435,7 @@ export async function fundMilestoneEscrow(
   agentId: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -465,7 +475,7 @@ export async function releaseMilestoneEscrow(
   agentId: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -506,7 +516,7 @@ export async function updateMilestoneState(
   userData?: { userId: string; userName: string }
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -572,7 +582,7 @@ export async function submitMilestoneCompletion(
   userId: string
 ): Promise<Milestone> {
   try {
-    const milestoneRef = doc(db, 'milestones', milestoneId);
+    const milestoneRef = doc(getDb(), 'milestones', milestoneId);
     const milestoneSnap = await getDoc(milestoneRef);
 
     if (!milestoneSnap.exists()) {
@@ -611,7 +621,7 @@ export async function submitMilestoneCompletion(
 export async function generateMilestoneInvoice(milestone: Milestone): Promise<Invoice> {
   try {
     // Fetch project to get contractor and agent info
-    const projectRef = doc(db, 'projects', milestone.projectId);
+    const projectRef = doc(getDb(), 'projects', milestone.projectId);
     const projectSnap = await getDoc(projectRef);
 
     if (!projectSnap.exists()) {
@@ -619,7 +629,7 @@ export async function generateMilestoneInvoice(milestone: Milestone): Promise<In
     }
 
     const project = projectSnap.data() as Project;
-    const invoiceRef = doc(collection(db, 'invoices'));
+    const invoiceRef = doc(collection(getDb(), 'invoices'));
 
     const invoice: Invoice = {
       id: invoiceRef.id,
@@ -651,7 +661,7 @@ export async function generateMilestoneInvoice(milestone: Milestone): Promise<In
  */
 export async function fetchProjectInvoices(projectId: string): Promise<Invoice[]> {
   try {
-    const q = query(collection(db, 'invoices'), where('projectId', '==', projectId));
+    const q = query(collection(getDb(), 'invoices'), where('projectId', '==', projectId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs
       .map((doc) => {

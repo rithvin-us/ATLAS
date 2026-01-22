@@ -6,7 +6,7 @@ import {
   User
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { getFirebaseAuth, getFirebaseDb } from './firebase-client';
 import { UserRole } from './types';
 
 export interface AuthUser {
@@ -23,6 +23,13 @@ export async function signUp(
   role: 'agent' | 'contractor',
   additionalData?: Record<string, any>
 ) {
+  const auth = getFirebaseAuth();
+  const db = getFirebaseDb();
+  
+  if (!auth || !db) {
+    return { success: false, error: 'Firebase not initialized' };
+  }
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -43,6 +50,13 @@ export async function signUp(
 
 // Sign in with email and password
 export async function signIn(email: string, password: string) {
+  const auth = getFirebaseAuth();
+  const db = getFirebaseDb();
+  
+  if (!auth || !db) {
+    return { success: false, error: 'Firebase not initialized' };
+  }
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -63,6 +77,12 @@ export async function signIn(email: string, password: string) {
 
 // Sign out
 export async function signOut() {
+  const auth = getFirebaseAuth();
+  
+  if (!auth) {
+    return { success: false, error: 'Firebase not initialized' };
+  }
+
   try {
     await firebaseSignOut(auth);
     return { success: true };
@@ -73,6 +93,12 @@ export async function signOut() {
 
 // Get current user
 export function getCurrentUser(): Promise<User | null> {
+  const auth = getFirebaseAuth();
+  
+  if (!auth) {
+    return Promise.resolve(null);
+  }
+
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
@@ -83,6 +109,12 @@ export function getCurrentUser(): Promise<User | null> {
 
 // Get user role from Firestore
 export async function getUserRole(uid: string): Promise<UserRole | null> {
+  const db = getFirebaseDb();
+  
+  if (!db) {
+    return null;
+  }
+
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
@@ -111,6 +143,12 @@ export interface UserProfile {
 
 // Get user profile data from Firestore
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  const db = getFirebaseDb();
+  
+  if (!db) {
+    return null;
+  }
+
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
@@ -128,6 +166,12 @@ export async function updateUserProfile(
   uid: string,
   updates: { displayName?: string; phone?: string }
 ) {
+  const db = getFirebaseDb();
+  
+  if (!db) {
+    return { success: false, error: 'Firebase not initialized' };
+  }
+
   try {
     const userRef = doc(db, 'users', uid);
     await setDoc(userRef, updates, { merge: true });

@@ -27,7 +27,7 @@ import {
 import { ContractorGuard } from '@/components/contractor/contractor-guard';
 import { useAuth } from '@/lib/auth-context';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { RFQ } from '@/lib/types';
 
 function RFQDetailContent() {
@@ -50,6 +50,9 @@ function RFQDetailContent() {
   useEffect(() => {
     async function loadRFQ() {
       if (!user) return;
+
+      const db = getFirebaseDb();
+      if (!db) return;
 
       try {
         setLoading(true);

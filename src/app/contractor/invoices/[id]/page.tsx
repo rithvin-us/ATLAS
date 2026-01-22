@@ -18,7 +18,7 @@ import {
 import { ContractorGuard } from '@/components/contractor/contractor-guard';
 import { useAuth } from '@/lib/auth-context';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase-client';
 import { Invoice } from '@/lib/types';
 
 function InvoiceDetailContent() {
@@ -34,6 +34,9 @@ function InvoiceDetailContent() {
   useEffect(() => {
     async function loadInvoice() {
       if (!user) return;
+
+      const db = getFirebaseDb();
+      if (!db) return;
 
       try {
         setLoading(true);

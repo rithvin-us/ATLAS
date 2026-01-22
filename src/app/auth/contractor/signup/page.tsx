@@ -63,40 +63,46 @@ export default function ContractorSignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 p-4 py-8">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Contractor Registration</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-coral-50 via-coral-100 to-base p-4 py-8 relative overflow-hidden">
+      {/* Decorative circles */}
+      <div className="absolute top-10 right-10 w-32 h-32 bg-coral-200 rounded-full opacity-30 blur-xl"></div>
+      <div className="absolute bottom-10 left-10 w-40 h-40 bg-mint-200 rounded-full opacity-30 blur-xl"></div>
+      
+      <Card className="w-full max-w-2xl border-0 shadow-card rounded-2xl relative z-10">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="text-3xl font-bold text-gray-900">Contractor Registration</CardTitle>
+          <CardDescription className="text-base text-gray-500">
             Register your company and upload compliance certificates
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="company-name">Company Name</Label>
+                <Label htmlFor="company-name" className="text-sm font-semibold text-gray-700">Company Name</Label>
                 <Input
                   id="company-name"
                   placeholder="Vendor LLC"
                   value={formData.companyName}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                   required
+                  className="h-12 rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact-name">Contact Person</Label>
+                <Label htmlFor="contact-name" className="text-sm font-semibold text-gray-700">Contact Person</Label>
                 <Input
                   id="contact-name"
                   placeholder="Jane Smith"
                   value={formData.contactName}
                   onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                   required
+                  className="h-12 rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -104,10 +110,11 @@ export default function ContractorSignupPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="h-12 rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -115,13 +122,14 @@ export default function ContractorSignupPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
+                className="h-12 rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
               />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="industry">Industry</Label>
+                <Label htmlFor="industry" className="text-sm font-semibold text-gray-700">Industry</Label>
                 <Select onValueChange={(value) => setFormData({ ...formData, industry: value })}>
-                  <SelectTrigger id="industry">
+                  <SelectTrigger id="industry" className="h-12 rounded-xl border-mint-200">
                     <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
                   <SelectContent>
@@ -135,50 +143,63 @@ export default function ContractorSignupPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location" className="text-sm font-semibold text-gray-700">Location</Label>
                 <Input
                   id="location"
                   placeholder="City, State"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   required
+                  className="h-12 rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Company Description</Label>
+              <Label htmlFor="description" className="text-sm font-semibold text-gray-700">Company Description</Label>
               <Textarea
                 id="description"
                 placeholder="Brief description of your company and services"
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="rounded-xl border-mint-200 focus:border-coral focus:ring-coral"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="certificates">Compliance Certificates</Label>
+              <Label htmlFor="certificates" className="text-sm font-semibold text-gray-700">Compliance Certificates</Label>
               <Input
                 id="certificates"
                 type="file"
                 multiple
                 accept=".pdf,.doc,.docx"
+                className="rounded-xl border-mint-200"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500">
                 Upload licenses, insurance certificates, safety credentials, and quality certifications
               </p>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-mint-50 border border-mint-200 rounded-xl p-4">
+              <p className="text-sm text-mint-dark">
                 Your credibility score will be calculated after verification. Verification typically takes 2-3 business days.
               </p>
             </div>
-            <Button className="w-full" size="lg" type="submit" disabled={loading}>
+            <Button 
+              className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-coral to-coral-dark hover:from-coral-dark hover:to-coral-dark shadow-soft hover:shadow-soft-lg transition-all" 
+              size="lg" 
+              type="submit" 
+              disabled={loading}
+            >
               {loading ? 'Creating account...' : 'Register & Submit for Verification'}
             </Button>
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
-              <Link href="/auth/contractor/login" className="text-primary hover:underline">
+            <div className="text-center text-sm pt-2">
+              <span className="text-gray-600">Already have an account? </span>
+              <Link href="/auth/contractor/login" className="text-coral-dark font-semibold hover:text-mint-dark hover:underline">
                 Sign in
+              </Link>
+            </div>
+            <div className="text-center pt-2">
+              <Link href="/" className="text-sm text-gray-500 hover:text-coral-dark hover:underline">
+                ← Back to home
               </Link>
             </div>
           </form>
