@@ -347,10 +347,10 @@ export function LandingPage() {
                   </ul>
                   
                   <div className="flex gap-3">
-                    <Button asChild className="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-full">
+                    <Button asChild className="flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-full">
                       <Link href="/auth/contractor/login">Contractor Login</Link>
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-full">
+                    <Button asChild variant="outline" className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white rounded-full">
                       <Link href="/auth/contractor/signup">Sign Up</Link>
                     </Button>
                   </div>
