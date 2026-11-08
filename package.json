@@ -26,19 +26,19 @@
   "dependencies": {
   
     
-  "@genkit-ai/ai": "^0.5.0",
+  "@genkit-ai/ai": "^1.44.0",
   
     
-  "@genkit-ai/core": "^0.5.0",
+  "@genkit-ai/core": "^1.44.0",
   
     
   "@genkit-ai/flow": "^0.5.0",
   
     
-  "@genkit-ai/google-genai": "^1.27.0",
+  "@genkit-ai/google-genai": "^1.44.0",
   
     
-  "@genkit-ai/googleai": "^0.5.0",
+  "@genkit-ai/googleai": "^1.28.0",
   
     
   "@radix-ui/react-accordion": "^1.1.2",
