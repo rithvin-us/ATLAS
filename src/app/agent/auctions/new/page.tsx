@@ -127,7 +127,7 @@ export default function CreateAuctionPage() {
             <Link href="/agent/auctions" className="text-muted-foreground hover:text-foreground">
               ← Auctions
             </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Create Auction</h1>
+            <h1 className="text-2xl font-medium ml-4">Create Auction</h1>
           </div>
         </header>
 

@@ -129,7 +129,7 @@ export default function AgentProfile() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">My Profile</h1>
+            <h1 className="text-3xl font-medium">My Profile</h1>
             <p className="text-muted-foreground">View and manage your profile information</p>
           </div>
           {!editing ? (
@@ -141,7 +141,7 @@ export default function AgentProfile() {
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={saving}>
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? 'Saving' : 'Save'}
               </Button>
               <Button onClick={handleCancel} variant="outline" disabled={saving}>
                 <X className="h-4 w-4 mr-2" />
@@ -281,17 +281,17 @@ export default function AgentProfile() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Projects Created</p>
-                <p className="text-3xl font-bold">{stats.projectsCreated}</p>
+                <p className="text-3xl font-medium">{stats.projectsCreated}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">RFQs Posted</p>
-                <p className="text-3xl font-bold">{stats.rfqsPosted}</p>
+                <p className="text-3xl font-medium">{stats.rfqsPosted}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Verification Status</p>
                 <div className="flex items-center gap-2 pt-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  <span className="font-semibold">Verified</span>
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <span className="font-medium">Verified</span>
                 </div>
               </div>
             </div>

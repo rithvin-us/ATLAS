@@ -95,10 +95,10 @@ function AuctionsContent() {
   const auctionStatus = (auction?: Auction) => {
     if (!auction) return '—';
     return deriveAuctionStatus(auction.startDate, auction.endDate) === 'scheduled'
-      ? '⏳ Scheduled'
+      ? 'Scheduled'
       : deriveAuctionStatus(auction.startDate, auction.endDate) === 'live'
-      ? '🟢 Live'
-      : '🔒 Closed';
+      ? 'Live'
+      : 'Closed';
   };
 
   const handleBid = (e: React.FormEvent) => {
@@ -111,7 +111,7 @@ function AuctionsContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -119,11 +119,11 @@ function AuctionsContent() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 flex gap-3">
-          <AlertCircle className="h-6 w-6 text-red-600" />
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6 flex gap-3">
+          <AlertCircle className="h-6 w-6 text-destructive" />
           <div>
-            <h3 className="font-semibold text-red-900">Unable to load auctions</h3>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
+            <h3 className="font-medium text-destructive">Unable to load auctions</h3>
+            <p className="text-sm text-destructive mt-1">{error}</p>
           </div>
         </div>
       </div>
@@ -131,14 +131,14 @@ function AuctionsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Auctions</h1>
-            <p className="text-gray-600 mt-2">Participate in reverse auctions with confidential bids.</p>
+            <h1 className="text-3xl font-medium text-foreground">Auctions</h1>
+            <p className="text-muted-foreground mt-2">Participate in reverse auctions with confidential bids.</p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <LockKeyhole className="h-4 w-4" /> Bids are confidential and unseen by others.
           </div>
         </div>
@@ -146,7 +146,7 @@ function AuctionsContent() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {statusMessage && (
-          <div className="rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <div className="rounded-md border border-border bg-secondary px-4 py-3 text-sm text-primary">
             {statusMessage}
           </div>
         )}
@@ -155,7 +155,7 @@ function AuctionsContent() {
           <CardContent className="p-6 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by auction or project code"
                   className="pl-10"
@@ -163,8 +163,8 @@ function AuctionsContent() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Shield className="h-4 w-4 text-gray-500" /> Fair-play policy: no bidder identities exposed.
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Shield className="h-4 w-4 text-muted-foreground" /> Fair-play policy: no bidder identities exposed.
               </div>
             </div>
           </CardContent>
@@ -173,9 +173,9 @@ function AuctionsContent() {
         {filteredAuctions.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center space-y-3">
-              <Gavel className="h-14 w-14 text-gray-300 mx-auto" />
-              <h3 className="text-lg font-semibold text-gray-900">No active auctions</h3>
-              <p className="text-sm text-gray-600">Check back later for new opportunities.</p>
+              <Gavel className="h-14 w-14 text-muted-foreground/50 mx-auto" />
+              <h3 className="text-lg font-medium text-foreground">No active auctions</h3>
+              <p className="text-sm text-muted-foreground">Check back later for new opportunities.</p>
             </CardContent>
           </Card>
         ) : (
@@ -188,12 +188,12 @@ function AuctionsContent() {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="font-semibold">Project</TableHead>
-                      <TableHead className="font-semibold">Starting price</TableHead>
-                      <TableHead className="font-semibold">Current bid</TableHead>
-                      <TableHead className="font-semibold">Time remaining</TableHead>
-                      <TableHead className="font-semibold text-right">Action</TableHead>
+                    <TableRow className="bg-secondary">
+                      <TableHead className="font-medium">Project</TableHead>
+                      <TableHead className="font-medium">Starting price</TableHead>
+                      <TableHead className="font-medium">Current bid</TableHead>
+                      <TableHead className="font-medium">Time remaining</TableHead>
+                      <TableHead className="font-medium text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -203,17 +203,17 @@ function AuctionsContent() {
                       return (
                         <TableRow
                           key={auction.id}
-                          className={`cursor-pointer ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                          className={`cursor-pointer ${isSelected ? 'bg-secondary' : 'hover:bg-secondary'}`}
                           onClick={() => setSelectedAuction(auction)}
                         >
                           <TableCell>
-                            <div className="font-semibold text-gray-900">{auction.projectId?.slice(0, 10) || 'Project'}</div>
-                            <div className="text-xs text-gray-500">Auction {auction.id.slice(0, 8)}</div>
+                            <div className="font-medium text-foreground">{auction.projectId?.slice(0, 10) || 'Project'}</div>
+                            <div className="text-xs text-muted-foreground">Auction {auction.id.slice(0, 8)}</div>
                           </TableCell>
                           <TableCell>{formatMoney(undefined)}</TableCell>
                           <TableCell>{currentBest ? formatMoney(currentBest) : '—'}</TableCell>
-                          <TableCell className="text-sm text-gray-800 flex items-center gap-2">
-                            <Clock4 className="h-4 w-4 text-gray-500" /> {remaining}
+                          <TableCell className="text-sm text-foreground flex items-center gap-2">
+                            <Clock4 className="h-4 w-4 text-muted-foreground" /> {remaining}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelectedAuction(auction)}>
@@ -235,42 +235,42 @@ function AuctionsContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {!selectedAuction ? (
-                  <p className="text-sm text-gray-600">Select an auction to view details and place a bid.</p>
+                  <p className="text-sm text-muted-foreground">Select an auction to view details and place a bid.</p>
                 ) : (
                   <>
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <div className="text-xs text-gray-500">Project</div>
-                        <div className="font-semibold text-gray-900">{selectedAuction.projectId}</div>
-                        <div className="text-xs text-gray-500">Auction {selectedAuction.id}</div>
+                        <div className="text-xs text-muted-foreground">Project</div>
+                        <div className="font-medium text-foreground">{selectedAuction.projectId}</div>
+                        <div className="text-xs text-muted-foreground">Auction {selectedAuction.id}</div>
                       </div>
                       <Badge variant="outline">{auctionStatus(selectedAuction)}</Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <div className="text-gray-500">Starts</div>
-                        <div className="font-medium text-gray-900">{new Date(selectedAuction.startDate).toLocaleString()}</div>
+                        <div className="text-muted-foreground">Starts</div>
+                        <div className="font-medium text-foreground">{new Date(selectedAuction.startDate).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Ends</div>
-                        <div className="font-medium text-gray-900">{new Date(selectedAuction.endDate).toLocaleString()}</div>
+                        <div className="text-muted-foreground">Ends</div>
+                        <div className="font-medium text-foreground">{new Date(selectedAuction.endDate).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Current bid</div>
-                        <div className="font-semibold text-gray-900">{currentBest ? formatMoney(currentBest) : '—'}</div>
+                        <div className="text-muted-foreground">Current bid</div>
+                        <div className="font-medium text-foreground">{currentBest ? formatMoney(currentBest) : '—'}</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Your latest</div>
-                        <div className="font-semibold text-gray-900">{myLatestBid ? formatMoney(myLatestBid.amount) : '—'}</div>
+                        <div className="text-muted-foreground">Your latest</div>
+                        <div className="font-medium text-foreground">{myLatestBid ? formatMoney(myLatestBid.amount) : '—'}</div>
                       </div>
-                      <div className="col-span-2 flex items-center gap-2 text-gray-700 text-sm">
-                        <Clock4 className="h-4 w-4 text-gray-500" /> Time remaining: {timeRemaining(new Date(selectedAuction.endDate))}
+                      <div className="col-span-2 flex items-center gap-2 text-foreground text-sm">
+                        <Clock4 className="h-4 w-4 text-muted-foreground" /> Time remaining: {timeRemaining(new Date(selectedAuction.endDate))}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-sm font-semibold text-gray-800">Place a bid</div>
+                      <div className="text-sm font-medium text-foreground">Place a bid</div>
                       <form className="space-y-2" onSubmit={handleBid}>
                         <Input
                           type="number"
@@ -284,24 +284,24 @@ function AuctionsContent() {
                           <Send className="h-4 w-4" /> Submit bid
                         </Button>
                       </form>
-                      <p className="text-xs text-gray-600 flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <LockKeyhole className="h-3 w-3" /> Only you and the buyer see your bids. Other bidders stay anonymous.
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                        <History className="h-4 w-4 text-gray-500" /> Your bid history
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <History className="h-4 w-4 text-muted-foreground" /> Your bid history
                       </div>
                       {myBids.length === 0 ? (
-                        <p className="text-sm text-gray-600">No bids yet. Submit your first bid to participate.</p>
+                        <p className="text-sm text-muted-foreground">No bids yet. Submit your first bid to participate.</p>
                       ) : (
                         <div className="space-y-2 max-h-40 overflow-y-auto">
                           {myBids.slice().reverse().map((bid) => (
-                            <div key={bid.id} className="rounded-lg border p-3 bg-gray-50 flex items-center justify-between text-sm">
+                            <div key={bid.id} className="rounded-lg border p-3 bg-secondary flex items-center justify-between text-sm">
                               <div>
-                                <div className="font-semibold text-gray-900">{formatMoney(bid.amount)}</div>
-                                <div className="text-xs text-gray-600">{new Date(bid.submittedAt).toLocaleString()}</div>
+                                <div className="font-medium text-foreground">{formatMoney(bid.amount)}</div>
+                                <div className="text-xs text-muted-foreground">{new Date(bid.submittedAt).toLocaleString()}</div>
                               </div>
                               <Badge variant="outline" className="text-xs">My bid</Badge>
                             </div>

@@ -41,7 +41,7 @@ export default function AgentSignupPage() {
 
     if (result.success) {
       toast({
-        title: 'Success!',
+        title: 'Success',
         description: 'Account created successfully. Pending verification.',
       });
       router.push('/agent/dashboard');
@@ -57,15 +57,12 @@ export default function AgentSignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-mint-50 via-mint-100 to-base p-4 py-8 relative overflow-hidden">
-      {/* Decorative circles */}
-      <div className="absolute top-10 right-10 w-32 h-32 bg-mint-200 rounded-full opacity-30 blur-xl"></div>
-      <div className="absolute bottom-10 left-10 w-40 h-40 bg-coral-200 rounded-full opacity-30 blur-xl"></div>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 py-8">
       
-      <Card className="w-full max-w-2xl border-0 shadow-card rounded-2xl relative z-10">
+      <Card className="w-full max-w-2xl ">
         <CardHeader className="space-y-1 pb-6">
-          <CardTitle className="text-3xl font-bold text-gray-900">Agent Registration</CardTitle>
-          <CardDescription className="text-base text-gray-500">
+          <CardTitle className="text-3xl font-medium text-foreground">Agent Registration</CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
             Create your organization account and upload verification documents
           </CardDescription>
         </CardHeader>
@@ -73,30 +70,30 @@ export default function AgentSignupPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="org-name" className="text-sm font-semibold text-gray-700">Organization Name</Label>
+                <Label htmlFor="org-name" className="text-sm font-medium text-foreground">Organization Name</Label>
                 <Input
                   id="org-name"
                   placeholder="Company Inc."
                   value={formData.orgName}
                   onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
                   required
-                  className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
+                  className="h-12 rounded-xl border-input "
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="admin-name" className="text-sm font-semibold text-gray-700">Admin Name</Label>
+                <Label htmlFor="admin-name" className="text-sm font-medium text-foreground">Admin Name</Label>
                 <Input
                   id="admin-name"
                   placeholder="John Doe"
                   value={formData.adminName}
                   onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                   required
-                  className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
+                  className="h-12 rounded-xl border-input "
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Admin Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">Admin Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -104,11 +101,11 @@ export default function AgentSignupPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
+                className="h-12 rounded-xl border-input "
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -116,50 +113,50 @@ export default function AgentSignupPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
-                className="h-12 rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
+                className="h-12 rounded-xl border-input "
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="address" className="text-sm font-semibold text-gray-700">Organization Address</Label>
+              <Label htmlFor="address" className="text-sm font-medium text-foreground">Organization Address</Label>
               <Textarea
                 id="address"
                 placeholder="Full address of your organization"
                 rows={3}
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="rounded-xl border-mint-200 focus:border-mint focus:ring-mint"
+                className="rounded-xl border-input "
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="documents" className="text-sm font-semibold text-gray-700">Company Documents</Label>
+              <Label htmlFor="documents" className="text-sm font-medium text-foreground">Company Documents</Label>
               <Input
                 id="documents"
                 type="file"
                 multiple
                 accept=".pdf,.doc,.docx"
-                className="rounded-xl border-mint-200"
+                className="rounded-xl border-input"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Upload registration certificates, tax documents, and other verification documents
               </p>
             </div>
             <Button 
-              className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-mint to-mint-dark hover:from-mint-dark hover:to-mint-dark shadow-soft hover:shadow-soft-lg transition-all" 
+              className="w-full h-12 text-base font-medium rounded-xl bg-primary" 
               size="lg" 
               type="submit" 
               disabled={loading}
             >
-              {loading ? 'Creating account...' : 'Register & Submit for Verification'}
+              {loading ? 'Creating account' : 'Register & Submit for Verification'}
             </Button>
             <div className="text-center text-sm pt-2">
-              <span className="text-gray-600">Already have an account? </span>
-              <Link href="/auth/agent/login" className="text-mint-dark font-semibold hover:text-coral-dark hover:underline">
+              <span className="text-muted-foreground">Already have an account? </span>
+              <Link href="/auth/agent/login" className="text-muted-foreground font-medium hover:text-primary hover:underline">
                 Sign in
               </Link>
             </div>
             <div className="text-center pt-2">
-              <Link href="/" className="text-sm text-gray-500 hover:text-mint-dark hover:underline">
-                ← Back to home
+              <Link href="/" className="text-sm text-muted-foreground hover:text-muted-foreground hover:underline">
+                Back to home
               </Link>
             </div>
           </form>

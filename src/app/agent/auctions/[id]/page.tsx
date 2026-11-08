@@ -272,15 +272,15 @@ function AuctionDetailContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-8">
-          <Link href="/agent/auctions" className="inline-flex items-center gap-2 mb-4 text-blue-600 hover:text-blue-700">
+          <Link href="/agent/auctions" className="inline-flex items-center gap-2 mb-4 text-primary hover:text-primary">
             <ArrowLeft className="h-4 w-4" />
             Back to Auctions
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900">Auction Management</h1>
-          <p className="text-gray-600 text-lg mt-2">Manage bids and select top contractors</p>
+          <h1 className="text-4xl font-medium text-foreground">Auction Management</h1>
+          <p className="text-muted-foreground text-lg mt-2">Manage bids and select top contractors</p>
         </div>
 
         <div className="space-y-6">
@@ -324,30 +324,30 @@ function AuctionDetailContent() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                  <Users className="h-5 w-5 text-blue-600 mb-2" />
-                  <p className="text-xs text-blue-700 font-medium">Total Bids</p>
-                  <p className="text-2xl font-bold text-blue-900">{bids.length}</p>
+                <div className="p-4 rounded-lg bg-secondary border border-border">
+                  <Users className="h-5 w-5 text-primary mb-2" />
+                  <p className="text-xs text-primary font-medium">Total Bids</p>
+                  <p className="text-2xl font-medium text-primary">{bids.length}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                  <Award className="h-5 w-5 text-green-600 mb-2" />
-                  <p className="text-xs text-green-700 font-medium">Best Bid</p>
-                  <p className="text-2xl font-bold text-green-900">
+                <div className="p-4 rounded-lg bg-success/10 border border-success/30">
+                  <Award className="h-5 w-5 text-success mb-2" />
+                  <p className="text-xs text-success font-medium">Best Bid</p>
+                  <p className="text-2xl font-medium text-success">
                     {bestBid ? `$${bestBid.amount.toLocaleString()}` : '-'}
                   </p>
                 </div>
-                <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-                  <DollarSign className="h-5 w-5 text-purple-600 mb-2" />
-                  <p className="text-xs text-purple-700 font-medium">Average Bid</p>
-                  <p className="text-2xl font-bold text-purple-900">
+                <div className="p-4 rounded-lg bg-secondary border border-border">
+                  <DollarSign className="h-5 w-5 text-primary mb-2" />
+                  <p className="text-xs text-primary font-medium">Average Bid</p>
+                  <p className="text-2xl font-medium text-primary">
                     {avgBidAmount ? `$${Math.round(avgBidAmount).toLocaleString()}` : '-'}
                   </p>
                 </div>
-                <div className="p-4 rounded-lg bg-orange-50 border border-orange-200">
-                  <Calendar className="h-5 w-5 text-orange-600 mb-2" />
-                  <p className="text-xs text-orange-700 font-medium">Ends On</p>
-                  <p className="text-sm font-bold text-orange-900">{endDate?.toLocaleDateString()}</p>
-                  <p className="text-xs text-orange-700">{endDate?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <div className="p-4 rounded-lg bg-warning/10 border border-warning/30">
+                  <Calendar className="h-5 w-5 text-warning mb-2" />
+                  <p className="text-xs text-warning font-medium">Ends On</p>
+                  <p className="text-sm font-medium text-warning">{endDate?.toLocaleDateString()}</p>
+                  <p className="text-xs text-warning">{endDate?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             </CardContent>
@@ -358,75 +358,75 @@ function AuctionDetailContent() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-6 w-6 text-green-600" />
+                  <Sparkles className="h-6 w-6 text-success" />
                   <CardTitle>AI-Recommended Contractors</CardTitle>
-                  <Badge variant="secondary" className="bg-green-100 text-green-700">AI Ranked</Badge>
+                  <Badge variant="secondary" className="bg-success/10 text-success">AI Ranked</Badge>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Top candidates for this auction ranked by fit score</p>
+                <p className="text-sm text-muted-foreground mt-2">Top candidates for this auction ranked by fit score</p>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
                   {recommendedContractors.map((recommendation: any, index: number) => (
                     <Card
                       key={recommendation.id}
-                      className="border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/30 to-transparent hover:shadow-md transition-shadow"
+                      className="border-l-4 border-l-success bg-secondary hover:border-foreground/25 transition-shadow"
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <div className="flex-shrink-0">
-                                <div className="flex items-center justify-center h-7 w-7 rounded-full bg-green-100 text-green-600 font-bold text-xs">
+                                <div className="flex items-center justify-center h-7 w-7 rounded-full bg-success/10 text-success font-medium text-xs">
                                   #{index + 1}
                                 </div>
                               </div>
-                              <h4 className="font-semibold text-gray-900">
+                              <h4 className="font-medium text-foreground">
                                 {recommendation.contractor.name}
                               </h4>
-                              <Badge className="bg-green-600">
+                              <Badge className="bg-success">
                                 {recommendation.fitScore}% Fit
                               </Badge>
                             </div>
 
-                            <p className="text-sm text-green-700 font-medium mb-3">
+                            <p className="text-sm text-success font-medium mb-3">
                               ✓ {recommendation.explanation}
                             </p>
 
                             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Credibility</div>
-                                <div className="text-sm font-bold text-purple-600">{recommendation.factors.credibility}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Credibility</div>
+                                <div className="text-sm font-medium text-primary">{recommendation.factors.credibility}%</div>
                               </div>
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Bid Fit</div>
-                                <div className="text-sm font-bold text-blue-600">{recommendation.factors.bidCompetitiveness}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Bid Fit</div>
+                                <div className="text-sm font-medium text-primary">{recommendation.factors.bidCompetitiveness}%</div>
                               </div>
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Delivery</div>
-                                <div className="text-sm font-bold text-green-600">{recommendation.factors.deliveryHistory}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Delivery</div>
+                                <div className="text-sm font-medium text-success">{recommendation.factors.deliveryHistory}%</div>
                               </div>
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Skills</div>
-                                <div className="text-sm font-bold text-yellow-600">{recommendation.factors.skillMatch}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Skills</div>
+                                <div className="text-sm font-medium text-warning">{recommendation.factors.skillMatch}%</div>
                               </div>
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Compliance</div>
-                                <div className="text-sm font-bold text-emerald-600">{recommendation.factors.compliance}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Compliance</div>
+                                <div className="text-sm font-medium text-success">{recommendation.factors.compliance}%</div>
                               </div>
-                              <div className="bg-white rounded p-2 border border-gray-200 text-center">
-                                <div className="text-xs text-gray-600">Experience</div>
-                                <div className="text-sm font-bold text-indigo-600">{recommendation.factors.pastPerformance}%</div>
+                              <div className="bg-card rounded p-2 border border-border text-center">
+                                <div className="text-xs text-muted-foreground">Experience</div>
+                                <div className="text-sm font-medium text-primary">{recommendation.factors.pastPerformance}%</div>
                               </div>
                             </div>
 
-                            <div className="text-xs text-gray-600">
-                              <span className="mr-4">💼 {recommendation.contractor.totalProjects} projects</span>
-                              <span className="mr-4">📅 {recommendation.contractor.yearsInBusiness} years</span>
-                              <span className="mr-4">⏱️ {recommendation.deliveryHistory.onTimePercentage}% on-time</span>
-                              <span>⭐ {recommendation.contractor.averageRating}/5.0</span>
+                            <div className="text-xs text-muted-foreground">
+                              <span className="mr-4">{recommendation.contractor.totalProjects} projects</span>
+                              <span className="mr-4">{recommendation.contractor.yearsInBusiness} years</span>
+                              <span className="mr-4">{recommendation.deliveryHistory.onTimePercentage}% on-time</span>
+                              <span>{recommendation.contractor.averageRating}/5.0</span>
                             </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-1" />
+                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                         </div>
                       </CardContent>
                     </Card>
@@ -453,7 +453,7 @@ function AuctionDetailContent() {
               {processedBids.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-semibold text-muted-foreground">No Bids Received Yet</p>
+                  <p className="text-lg font-medium text-muted-foreground">No Bids Received Yet</p>
                   <p className="text-sm text-muted-foreground mt-2">
                     Contractors haven't submitted any bids. Check back later.
                   </p>
@@ -474,13 +474,13 @@ function AuctionDetailContent() {
                     {processedBids.map((bid) => (
                       <TableRow 
                         key={bid.id}
-                        className={bid.rank === 'best' ? 'bg-green-50' : ''}
+                        className={bid.rank === 'best' ? 'bg-success/10' : ''}
                       >
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-lg">#{bid.position}</span>
+                            <span className="font-medium text-lg">#{bid.position}</span>
                             {bid.rank === 'best' && (
-                              <Award className="h-4 w-4 text-green-600" />
+                              <Award className="h-4 w-4 text-success" />
                             )}
                           </div>
                         </TableCell>
@@ -489,9 +489,9 @@ function AuctionDetailContent() {
                             <p className="font-medium">{bid.contractorId.slice(0, 12)}...</p>
                             <Badge variant="outline" className="text-xs">
                               {bid.rank === 'best' ? (
-                                <><CheckCircle2 className="h-3 w-3 mr-1 text-green-600" /> Best</>
+                                <><CheckCircle2 className="h-3 w-3 mr-1 text-success" /> Best</>
                               ) : bid.rank === 'high' ? (
-                                <><TrendingUp className="h-3 w-3 mr-1 text-red-600" /> High</>
+                                <><TrendingUp className="h-3 w-3 mr-1 text-destructive" /> High</>
                               ) : (
                                 <><Minus className="h-3 w-3 mr-1" /> Average</>
                               )}
@@ -500,9 +500,9 @@ function AuctionDetailContent() {
                         </TableCell>
                         <TableCell>
                           <p className={`text-lg font-bold ${
-                            bid.rank === 'best' ? 'text-green-600' : 
-                            bid.rank === 'high' ? 'text-red-600' : 
-                            'text-gray-900'
+                            bid.rank === 'best' ? 'text-success' : 
+                            bid.rank === 'high' ? 'text-destructive' : 
+                            'text-foreground'
                           }`}>
                             ${bid.amount.toLocaleString()}
                           </p>
@@ -529,11 +529,11 @@ function AuctionDetailContent() {
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
-                            <Button variant="outline" size="sm" className="text-green-600 hover:text-green-700">
+                            <Button variant="outline" size="sm" className="text-success hover:text-success">
                               <CheckCircle2 className="h-4 w-4 mr-1" />
                               Shortlist
                             </Button>
-                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>

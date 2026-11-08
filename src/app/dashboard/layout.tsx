@@ -24,7 +24,7 @@ export default function DashboardLayout({
               <Button variant="ghost" className="p-1 h-auto" asChild>
                 <>
                 <AtlasLogo className="w-8 h-8 text-primary" />
-                <span className="font-headline text-xl font-semibold text-foreground group-data-[state=collapsed]:hidden">ATLAS</span>
+                <span className="text-xl font-medium text-foreground group-data-[state=collapsed]:hidden">ATLAS</span>
                 </>
               </Button>
             </Link>
@@ -75,7 +75,7 @@ export default function DashboardLayout({
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
-                    placeholder="Search projects, RFQs..."
+                    placeholder="Search projects, RFQs"
                     className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
                   />
                 </div>

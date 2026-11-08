@@ -25,14 +25,14 @@ import { AlertCircle, CheckCircle2, Clock, FileText, Upload, Plus, Shield, Dolla
 
 const getMilestoneStateColor = (state: string) => {
   const colors: Record<string, string> = {
-    'pending': 'bg-gray-100 text-gray-800',
-    'in-progress': 'bg-blue-100 text-blue-800',
-    'completed': 'bg-yellow-100 text-yellow-800',
-    'verification-pending': 'bg-orange-100 text-orange-800',
-    'verified': 'bg-green-100 text-green-800',
-    'invoiced': 'bg-purple-100 text-purple-800',
+    'pending': 'bg-secondary text-foreground',
+    'in-progress': 'bg-secondary text-primary',
+    'completed': 'bg-warning/10 text-warning',
+    'verification-pending': 'bg-warning/10 text-warning',
+    'verified': 'bg-success/10 text-success',
+    'invoiced': 'bg-secondary text-primary',
   };
-  return colors[state] || 'bg-gray-100 text-gray-800';
+  return colors[state] || 'bg-secondary text-foreground';
 };
 
 const getMilestoneStateLabel = (state: string) => {
@@ -49,23 +49,23 @@ const getMilestoneStateLabel = (state: string) => {
 
 const getEscrowStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    'not-funded': 'bg-gray-100 text-gray-700',
-    'funded': 'bg-green-100 text-green-700',
-    'released': 'bg-blue-100 text-blue-700',
-    'disputed': 'bg-red-100 text-red-700',
-    'refunded': 'bg-orange-100 text-orange-700',
+    'not-funded': 'bg-secondary text-foreground',
+    'funded': 'bg-success/10 text-success',
+    'released': 'bg-secondary text-primary',
+    'disputed': 'bg-destructive/10 text-destructive',
+    'refunded': 'bg-warning/10 text-warning',
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return colors[status] || 'bg-secondary text-foreground';
 };
 
 const getApprovalStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    'pending': 'bg-yellow-100 text-yellow-800',
-    'approved': 'bg-green-100 text-green-800',
-    'rejected': 'bg-red-100 text-red-800',
-    'revision-requested': 'bg-orange-100 text-orange-800',
+    'pending': 'bg-warning/10 text-warning',
+    'approved': 'bg-success/10 text-success',
+    'rejected': 'bg-destructive/10 text-destructive',
+    'revision-requested': 'bg-warning/10 text-warning',
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return colors[status] || 'bg-secondary text-foreground';
 };
 
 export default function ProjectDetailPage() {
@@ -276,9 +276,9 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-32 bg-gray-200 rounded" />
+        <div className="space-y-4">
+          <div className="h-8 bg-secondary rounded w-1/3" />
+          <div className="h-32 bg-secondary rounded" />
         </div>
       </div>
     );
@@ -302,12 +302,12 @@ export default function ProjectDetailPage() {
   const totalEarned = milestones.filter(m => m.escrowStatus === 'released').reduce((sum, m) => sum + (m.paymentAmount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Project Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
-          <p className="text-gray-600 mt-1">{project.description}</p>
+          <h1 className="text-3xl font-medium text-foreground">{project.name}</h1>
+          <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
 
         {error && (
@@ -321,49 +321,49 @@ export default function ProjectDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Budget</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Budget</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">${(project.totalBudget || project.budget || 0).toLocaleString()}</div>
+              <div className="text-2xl font-medium text-foreground">${(project.totalBudget || project.budget || 0).toLocaleString()}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Milestones</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Milestones</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{totalMilestones}</div>
+              <div className="text-2xl font-medium text-foreground">{totalMilestones}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Escrow Funded</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Escrow Funded</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-sky-600">${totalEscrowFunded.toLocaleString()}</div>
+              <div className="text-2xl font-medium text-primary">${totalEscrowFunded.toLocaleString()}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Earned</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Earned</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">${totalEarned.toLocaleString()}</div>
+              <div className="text-2xl font-medium text-success">${totalEarned.toLocaleString()}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Progress</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{Math.round(progressPercentage)}%</div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div className="text-2xl font-medium text-foreground">{Math.round(progressPercentage)}%</div>
+              <div className="w-full bg-secondary rounded-full h-2 mt-2">
                 <div
-                  className="bg-green-600 h-2 rounded-full transition-all"
+                  className="bg-success h-2 rounded-full transition-colors"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
@@ -388,7 +388,7 @@ export default function ProjectDetailPage() {
                   </div>
                   <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                     <DialogTrigger asChild>
-                      <Button className="bg-sky-600 hover:bg-sky-700">
+                      <Button className="bg-primary hover:bg-primary">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Milestone
                       </Button>
@@ -418,7 +418,7 @@ export default function ProjectDetailPage() {
                             id="description"
                             value={newMilestone.description}
                             onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
-                            placeholder="Detailed scope of work for this milestone..."
+                            placeholder="Detailed scope of work for this milestone"
                             className="min-h-24"
                           />
                         </div>
@@ -451,11 +451,11 @@ export default function ProjectDetailPage() {
                         <div>
                           <Label>Proforma Invoice / Documents (Optional)</Label>
                           <div
-                            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
+                            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-secondary"
                             onClick={() => proformaInputRef.current?.click()}
                           >
-                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-sm text-gray-600">Click to upload proforma or supporting documents</p>
+                            <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">Click to upload proforma or supporting documents</p>
                             <input
                               ref={proformaInputRef}
                               type="file"
@@ -469,7 +469,7 @@ export default function ProjectDetailPage() {
                             <div className="mt-3 space-y-2">
                               {proformaFiles.map((file) => (
                                 <div key={file.name} className="flex items-center gap-2 text-sm">
-                                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                  <CheckCircle2 className="h-4 w-4 text-success" />
                                   {file.name}
                                 </div>
                               ))}
@@ -482,9 +482,9 @@ export default function ProjectDetailPage() {
                           <Button
                             onClick={handleCreateMilestone}
                             disabled={creatingMilestone || !newMilestone.name || !newMilestone.description || newMilestone.paymentAmount <= 0}
-                            className="bg-sky-600 hover:bg-sky-700"
+                            className="bg-primary hover:bg-primary"
                           >
-                            {creatingMilestone ? 'Creating...' : 'Create & Submit for Approval'}
+                            {creatingMilestone ? 'Creating' : 'Create & Submit for Approval'}
                           </Button>
                         </div>
                       </div>
@@ -496,9 +496,9 @@ export default function ProjectDetailPage() {
                 <div className="space-y-3">
                   {milestones.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500 mb-4">No milestones yet</p>
-                      <Button onClick={() => setShowCreateDialog(true)} className="bg-sky-600 hover:bg-sky-700">
+                      <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                      <p className="text-muted-foreground mb-4">No milestones yet</p>
+                      <Button onClick={() => setShowCreateDialog(true)} className="bg-primary hover:bg-primary">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Your First Milestone
                       </Button>
@@ -507,11 +507,11 @@ export default function ProjectDetailPage() {
                     milestones.map((milestone) => (
                       <div
                         key={milestone.id}
-                        className="flex items-start justify-between p-4 border rounded-lg hover:bg-gray-50 transition"
+                        className="flex items-start justify-between p-4 border rounded-lg hover:bg-secondary transition"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2 flex-wrap">
-                            <h3 className="font-semibold text-gray-900">{milestone.title || milestone.name}</h3>
+                            <h3 className="font-medium text-foreground">{milestone.title || milestone.name}</h3>
                             <Badge className={getMilestoneStateColor(milestone.status)}>
                               {getMilestoneStateLabel(milestone.status)}
                             </Badge>
@@ -526,8 +526,8 @@ export default function ProjectDetailPage() {
                               Escrow: {milestone.escrowStatus.replace('-', ' ')}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{milestone.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                          <p className="text-sm text-muted-foreground mb-2">{milestone.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1">
                               <DollarSign className="h-4 w-4" />
                               ${(milestone.paymentAmount || 0).toLocaleString()}
@@ -543,18 +543,18 @@ export default function ProjectDetailPage() {
                           </div>
                           
                           {milestone.rejectionReason && (
-                            <Alert className="mt-3 border-red-200 bg-red-50">
-                              <AlertCircle className="h-4 w-4 text-red-600" />
-                              <AlertDescription className="text-red-800">
+                            <Alert className="mt-3 border-destructive/30 bg-destructive/10">
+                              <AlertCircle className="h-4 w-4 text-destructive" />
+                              <AlertDescription className="text-destructive">
                                 <strong>Rejection reason:</strong> {milestone.rejectionReason}
                               </AlertDescription>
                             </Alert>
                           )}
                           
                           {milestone.revisionNotes && milestone.agentApprovalStatus === 'revision-requested' && (
-                            <Alert className="mt-3 border-orange-200 bg-orange-50">
-                              <AlertCircle className="h-4 w-4 text-orange-600" />
-                              <AlertDescription className="text-orange-800">
+                            <Alert className="mt-3 border-warning/30 bg-warning/10">
+                              <AlertCircle className="h-4 w-4 text-warning" />
+                              <AlertDescription className="text-warning">
                                 <strong>Revision needed:</strong> {milestone.revisionNotes}
                               </AlertDescription>
                             </Alert>
@@ -569,7 +569,7 @@ export default function ProjectDetailPage() {
                           )}
 
                           {milestone.status === 'pending' && milestone.agentApprovalStatus === 'approved' && milestone.escrowStatus !== 'funded' && (
-                            <Badge variant="outline" className="w-fit whitespace-nowrap text-orange-700 border-orange-300">
+                            <Badge variant="outline" className="w-fit whitespace-nowrap text-warning border-warning/30">
                               Awaiting Escrow Funding
                             </Badge>
                           )}
@@ -579,7 +579,7 @@ export default function ProjectDetailPage() {
                               onClick={() => handleStartMilestone(milestone)}
                               variant="default"
                               size="sm"
-                              className="bg-sky-600 hover:bg-sky-700"
+                              className="bg-primary hover:bg-primary"
                             >
                               Start Work
                             </Button>
@@ -606,15 +606,15 @@ export default function ProjectDetailPage() {
 
                                 <div className="space-y-4">
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-foreground mb-2">
                                       Proof Documents *
                                     </label>
                                     <div
-                                      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
+                                      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-secondary"
                                       onClick={() => fileInputRef.current?.click()}
                                     >
-                                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                      <p className="text-sm text-gray-600">Click to upload or drag files</p>
+                                      <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                      <p className="text-sm text-muted-foreground">Click to upload or drag files</p>
                                       <input
                                         ref={fileInputRef}
                                         type="file"
@@ -628,7 +628,7 @@ export default function ProjectDetailPage() {
                                       <div className="mt-3 space-y-2">
                                         {uploadedFiles.map((file) => (
                                           <div key={file.name} className="flex items-center gap-2 text-sm">
-                                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                            <CheckCircle2 className="h-4 w-4 text-success" />
                                             {file.name}
                                           </div>
                                         ))}
@@ -637,13 +637,13 @@ export default function ProjectDetailPage() {
                                   </div>
 
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-foreground mb-2">
                                       Notes (optional)
                                     </label>
                                     <Textarea
                                       value={submissionNotes}
                                       onChange={(e) => setSubmissionNotes(e.target.value)}
-                                      placeholder="Add any notes about this milestone completion..."
+                                      placeholder="Add any notes about this milestone completion"
                                       className="min-h-24"
                                     />
                                   </div>
@@ -653,9 +653,9 @@ export default function ProjectDetailPage() {
                                     <Button
                                       onClick={handleSubmitCompletion}
                                       disabled={submittingMilestone || uploadedFiles.length === 0}
-                                      className="bg-sky-600 hover:bg-sky-700"
+                                      className="bg-primary hover:bg-primary"
                                     >
-                                      {submittingMilestone ? 'Submitting...' : 'Submit for Verification'}
+                                      {submittingMilestone ? 'Submitting' : 'Submit for Verification'}
                                     </Button>
                                   </div>
                                 </div>
@@ -671,12 +671,12 @@ export default function ProjectDetailPage() {
 
                           {['verified', 'invoiced'].includes(milestone.status) && (
                             <div className="space-y-2">
-                              <Badge variant="outline" className="w-fit bg-green-50 text-green-700 border-green-200">
+                              <Badge variant="outline" className="w-fit bg-success/10 text-success border-success/30">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 Approved
                               </Badge>
                               {milestone.escrowStatus === 'released' && (
-                                <Badge variant="outline" className="w-fit bg-blue-50 text-blue-700 border-blue-200">
+                                <Badge variant="outline" className="w-fit bg-secondary text-primary border-border">
                                   <DollarSign className="h-3 w-3 mr-1" />
                                   Payment Released
                                 </Badge>
@@ -701,24 +701,24 @@ export default function ProjectDetailPage() {
               <CardContent>
                 <div className="space-y-3">
                   {invoices.length === 0 ? (
-                    <p className="text-gray-500 text-center py-6">No invoices generated yet</p>
+                    <p className="text-muted-foreground text-center py-6">No invoices generated yet</p>
                   ) : (
                     invoices.map((invoice) => (
                       <div
                         key={invoice.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition"
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary transition"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-gray-900">Invoice #{invoice.id.slice(0, 8)}</h3>
+                            <h3 className="font-medium text-foreground">Invoice #{invoice.id.slice(0, 8)}</h3>
                             <Badge variant="outline">{invoice.status}</Badge>
                           </div>
-                          <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
+                          <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground mt-2">
                             <span>Amount: </span>
                             <span>Tax (5%): </span>
                             <span>Total: </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
+                          <p className="text-xs text-muted-foreground mt-2">
                             Due: {new Date(invoice.dueDate).toLocaleDateString()}
                           </p>
                         </div>

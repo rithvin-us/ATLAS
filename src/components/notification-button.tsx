@@ -28,7 +28,7 @@ export function NotificationButton() {
       {
         id: '1',
         type: isAgent ? 'bidding_started' : 'invoice_pending',
-        title: isAgent ? '🎯 Bidding Started' : '📄 Invoice #INV-001',
+        title: isAgent ? 'Bidding Started' : 'Invoice #INV-001',
         message: isAgent 
           ? 'Website Redesign Project is now accepting bids'
           : 'Invoice #INV-001 for $5,000 is awaiting approval',
@@ -38,7 +38,7 @@ export function NotificationButton() {
       {
         id: '2',
         type: isAgent ? 'bidding_ended' : 'invoice_pending',
-        title: isAgent ? '✅ Bidding Ended' : '📄 Invoice #INV-002',
+        title: isAgent ? 'Bidding Ended' : 'Invoice #INV-002',
         message: isAgent
           ? 'Mobile App Development auction closed with 5 bids'
           : 'Invoice #INV-002 for $3,500 awaiting approval',
@@ -48,7 +48,7 @@ export function NotificationButton() {
       {
         id: '3',
         type: isAgent ? 'bidding_started' : 'invoice_pending',
-        title: isAgent ? '🎯 Bidding Started' : '📄 Invoice #INV-003',
+        title: isAgent ? 'Bidding Started' : 'Invoice #INV-003',
         message: isAgent
           ? 'Database Migration auction accepting bids from contractors'
           : 'Invoice #INV-003 for $2,200 submitted and pending',

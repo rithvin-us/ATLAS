@@ -138,7 +138,7 @@ function SubmitRFQResponseContent() {
           order: i
         })) as Question[]
       });
-      alert('Response submitted successfully!');
+      alert('Response submitted successfully');
       router.push(`/contractor/rfqs/${rfqId}`);
     } catch (err: any) {
       console.error('Failed to submit response:', err);
@@ -177,7 +177,7 @@ function SubmitRFQResponseContent() {
           <Link href={`/contractor/rfqs/${rfqId}`} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Submit Response</h1>
+          <h1 className="text-2xl font-medium ml-4">Submit Response</h1>
         </div>
       </header>
 
@@ -217,7 +217,7 @@ function SubmitRFQResponseContent() {
                     <Label htmlFor="executionPlan">Execution Plan *</Label>
                     <Textarea
                       id="executionPlan"
-                      placeholder="Describe how you plan to execute this project..."
+                      placeholder="Describe how you plan to execute this project"
                       rows={6}
                       value={executionPlan}
                       onChange={(e) => setExecutionPlan(e.target.value)}
@@ -233,7 +233,7 @@ function SubmitRFQResponseContent() {
                     <Label htmlFor="timeline">Proposed Timeline *</Label>
                     <Textarea
                       id="timeline"
-                      placeholder="e.g., Phase 1: Weeks 1-2 - Site preparation..."
+                      placeholder="e.g., Phase 1: Weeks 1-2 - Site preparation"
                       rows={4}
                       value={timeline}
                       onChange={(e) => setTimeline(e.target.value)}
@@ -249,7 +249,7 @@ function SubmitRFQResponseContent() {
                     <Label htmlFor="questions">Questions or Clarifications (Optional)</Label>
                     <Textarea
                       id="questions"
-                      placeholder="Any questions or clarifications you need..."
+                      placeholder="Any questions or clarifications you need"
                       rows={3}
                       value={questions}
                       onChange={(e) => setQuestions(e.target.value)}
@@ -291,7 +291,7 @@ function SubmitRFQResponseContent() {
               <CardContent className="space-y-3">
                 <div>
                   <div className="text-sm text-muted-foreground">Title</div>
-                  <div className="font-semibold">{rfq.title}</div>
+                  <div className="font-medium">{rfq.title}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Location</div>
@@ -299,7 +299,7 @@ function SubmitRFQResponseContent() {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Budget</div>
-                  <div className="font-semibold">${(rfq.budget || 0).toLocaleString()}</div>
+                  <div className="font-medium">${(rfq.budget || 0).toLocaleString()}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Deadline</div>

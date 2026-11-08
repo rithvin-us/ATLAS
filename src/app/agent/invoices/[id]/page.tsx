@@ -68,18 +68,18 @@ export default function InvoiceDetailPage() {
 
   return (
     <AgentGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Back Navigation */}
-          <Link href="/agent/invoices" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 mb-6">
+          <Link href="/agent/invoices" className="text-primary hover:text-primary flex items-center gap-1 mb-6">
             <ArrowLeft className="h-4 w-4" />
             Back to Invoices
           </Link>
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Invoice Details</h1>
-            <p className="text-gray-600 text-lg">Review and manage invoice status</p>
+            <h1 className="text-4xl font-medium text-foreground mb-2">Invoice Details</h1>
+            <p className="text-muted-foreground text-lg">Review and manage invoice status</p>
           </div>
           {error && !loading && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive mb-4">
@@ -90,7 +90,7 @@ export default function InvoiceDetailPage() {
           {loading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading invoice...</span>
+              <span>Loading invoice</span>
             </div>
           ) : invoice ? (
             <div className="space-y-6">
@@ -141,15 +141,15 @@ export default function InvoiceDetailPage() {
                       <span className="text-muted-foreground">Tax</span>
                       <span className="font-medium">${invoice.taxAmount.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold border-t pt-2">
+                    <div className="flex justify-between text-lg font-medium border-t pt-2">
                       <span>Total</span>
                       <span>${invoice.totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {invoice.paidAt && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-sm font-medium text-green-900">Paid on {new Date(invoice.paidAt).toLocaleDateString()}</p>
+                    <div className="bg-success/10 border border-success/30 rounded-lg p-3">
+                      <p className="text-sm font-medium text-success">Paid on {new Date(invoice.paidAt).toLocaleDateString()}</p>
                     </div>
                   )}
                 </CardContent>

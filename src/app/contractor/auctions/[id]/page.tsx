@@ -223,7 +223,7 @@ function AuctionDetailContent() {
           <Link href="/contractor/auctions" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Auction Details</h1>
+          <h1 className="text-2xl font-medium ml-4">Auction Details</h1>
         </div>
       </header>
 
@@ -231,11 +231,11 @@ function AuctionDetailContent() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Success Message */}
           {bidSuccess && (
-            <div className="rounded-lg bg-green-50 border border-green-200 p-4 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <div className="rounded-lg bg-success/10 border border-success/30 p-4 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
               <div>
-                <p className="font-semibold text-green-900">Bid Submitted Successfully!</p>
-                <p className="text-sm text-green-700">Your bid has been recorded and the agent will review it.</p>
+                <p className="font-medium text-success">Bid submitted</p>
+                <p className="text-sm text-success">Your bid has been recorded and the agent will review it.</p>
               </div>
             </div>
           )}
@@ -248,7 +248,7 @@ function AuctionDetailContent() {
                   <CardTitle className="text-2xl">Project: {auction.projectId.slice(0, 12)}...</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant={isActive ? 'default' : 'secondary'} className="text-sm">
-                      {auctionStatus === 'scheduled' ? '⏳ Scheduled' : auctionStatus === 'live' ? '🟢 Live' : '🔒 Closed'}
+                      {auctionStatus === 'scheduled' ? 'Scheduled' : auctionStatus === 'live' ? 'Live' : 'Closed'}
                     </Badge>
                     {!isClosed && (
                       <Badge variant="outline" className="text-sm flex items-center gap-1">
@@ -268,53 +268,53 @@ function AuctionDetailContent() {
                   <Calendar className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Auction Type</p>
-                    <p className="font-semibold capitalize">{auction.type || 'Reverse'}</p>
+                    <p className="font-medium capitalize">{auction.type || 'Reverse'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                   <Clock className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Time Remaining</p>
-                    <p className="font-semibold">{timeRemaining}</p>
+                    <p className="font-medium">{timeRemaining}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                   <Calendar className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">End Date</p>
-                    <p className="font-semibold">{endDate?.toLocaleDateString()}</p>
+                    <p className="font-medium">{endDate?.toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                   <Users className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Total Bids</p>
-                    <p className="font-semibold">{bids.length} bids</p>
+                    <p className="font-medium">{bids.length} bids</p>
                   </div>
                 </div>
               </div>
 
               {/* Your Last Bid */}
               {myBid && (
-                <div className={`p-4 rounded-lg border-2 ${isMyBidLowest ? 'bg-green-50 border-green-300' : 'bg-blue-50 border-blue-300'}`}>
+                <div className={`p-4 rounded-lg border-2 ${isMyBidLowest ? 'bg-success/10 border-success/30' : 'bg-secondary border-border'}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Your Last Submitted Bid</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">
+                      <p className="text-sm font-medium text-foreground">Your Last Submitted Bid</p>
+                      <p className="text-2xl font-medium text-foreground mt-1">
                         <DollarSign className="h-6 w-6 inline" />
                         {myBid.amount.toLocaleString()}
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Submitted: {new Date(myBid.submittedAt).toLocaleString()}
                       </p>
                     </div>
                     {isMyBidLowest && (
                       <div className="text-right">
-                        <Badge className="bg-green-600">
+                        <Badge className="bg-success">
                           <TrendingDown className="h-3 w-3 mr-1" />
                           Lowest Bid
                         </Badge>
-                        <p className="text-xs text-green-700 mt-1">You're winning!</p>
+                        <p className="text-xs text-success mt-1">You are winning</p>
                       </div>
                     )}
                   </div>
@@ -323,14 +323,14 @@ function AuctionDetailContent() {
 
               {/* Bid Range Info */}
               {lowestBid && (
-                <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-gray-50 border">
+                <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-secondary border">
                   <div>
                     <p className="text-xs text-muted-foreground">Current Lowest Bid</p>
-                    <p className="text-xl font-bold text-green-600">${lowestBid.toLocaleString()}</p>
+                    <p className="text-xl font-medium text-success">${lowestBid.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Highest Bid</p>
-                    <p className="text-xl font-bold text-red-600">${highestBid?.toLocaleString()}</p>
+                    <p className="text-xl font-medium text-destructive">${highestBid?.toLocaleString()}</p>
                   </div>
                 </div>
               )}
@@ -348,14 +348,14 @@ function AuctionDetailContent() {
             <CardContent className="space-y-4">
               {isClosed ? (
                 <div className="text-center py-8">
-                  <AlertTriangle className="h-12 w-12 text-yellow-600 mx-auto mb-3" />
-                  <p className="text-lg font-semibold text-gray-900">Auction Closed</p>
+                  <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-3" />
+                  <p className="text-lg font-medium text-foreground">Auction Closed</p>
                   <p className="text-sm text-muted-foreground mt-1">This auction is no longer accepting bids.</p>
                 </div>
               ) : (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="bidAmount" className="text-base font-semibold">
+                    <Label htmlFor="bidAmount" className="text-base font-medium">
                       Enter your bid amount
                     </Label>
                     <div className="relative">
@@ -374,7 +374,7 @@ function AuctionDetailContent() {
                         disabled={submitting}
                       />
                     </div>
-                    <div className="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+                    <div className="flex items-start gap-2 text-sm text-primary bg-secondary p-3 rounded-md">
                       <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
                       <p>
                         {auction.type === 'reverse' 
@@ -385,7 +385,7 @@ function AuctionDetailContent() {
                   </div>
 
                   {bidError && (
-                    <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">
+                    <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/30">
                       <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                       <p>{bidError}</p>
                     </div>
@@ -420,7 +420,7 @@ function AuctionDetailContent() {
                       <div className="py-4">
                         <div className="p-4 rounded-lg bg-muted">
                           <p className="text-sm text-muted-foreground">Your Bid Amount</p>
-                          <p className="text-3xl font-bold mt-1">${parseFloat(bidAmount).toLocaleString()}</p>
+                          <p className="text-3xl font-medium mt-1">${parseFloat(bidAmount).toLocaleString()}</p>
                         </div>
                       </div>
                       <div className="flex gap-3">

@@ -68,18 +68,18 @@ export default function ProjectDetailPage() {
 
   return (
     <AgentGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Back Navigation */}
-          <Link href="/agent/projects" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 mb-6">
+          <Link href="/agent/projects" className="text-primary hover:text-primary flex items-center gap-1 mb-6">
             <ArrowLeft className="h-4 w-4" />
             Back to Projects
           </Link>
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Project Details</h1>
-            <p className="text-gray-600 text-lg">Manage project information and status</p>
+            <h1 className="text-4xl font-medium text-foreground mb-2">Project Details</h1>
+            <p className="text-muted-foreground text-lg">Manage project information and status</p>
           </div>
           {error && !loading && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive mb-4">
@@ -90,7 +90,7 @@ export default function ProjectDetailPage() {
           {loading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading project...</span>
+              <span>Loading project</span>
             </div>
           ) : project ? (
             <div className="space-y-6">

@@ -10,10 +10,10 @@ function CredibilityPageContent() {
   const score = 85;
 
   const metrics = [
-    { label: "On-Time Completion", value: 95, max: 100, color: "text-green-600", bg: "bg-green-100" },
-    { label: "Quality Rating", value: 4.8, max: 5, color: "text-blue-600", bg: "bg-blue-100" },
-    { label: "Response Rate", value: 92, max: 100, color: "text-purple-600", bg: "bg-purple-100" },
-    { label: "Compliance Score", value: 88, max: 100, color: "text-orange-600", bg: "bg-orange-100" },
+    { label: "On-Time Completion", value: 95, max: 100, color: "text-success", bg: "bg-success/10" },
+    { label: "Quality Rating", value: 4.8, max: 5, color: "text-primary", bg: "bg-secondary" },
+    { label: "Response Rate", value: 92, max: 100, color: "text-primary", bg: "bg-secondary" },
+    { label: "Compliance Score", value: 88, max: 100, color: "text-warning", bg: "bg-warning/10" },
   ];
 
   const documents = [
@@ -31,19 +31,19 @@ function CredibilityPageContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-            <Award className="h-10 w-10 text-yellow-500 fill-yellow-500" />
+          <h1 className="text-4xl font-medium text-foreground flex items-center gap-3 mb-2">
+            <Award className="h-10 w-10 text-warning fill-warning" />
             Your Credibility Profile
           </h1>
-          <p className="text-gray-600 text-lg">Build trust and credibility to win more projects</p>
+          <p className="text-muted-foreground text-lg">Build trust and credibility to win more projects</p>
         </div>
 
         {/* Big Score Meter */}
-        <Card className="mb-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-0">
+        <Card className="mb-8 bg-secondary border-0">
           <CardHeader>
             <CardTitle>Credibility Score</CardTitle>
           </CardHeader>
@@ -51,10 +51,10 @@ function CredibilityPageContent() {
             <div className="flex flex-col md:flex-row items-center justify-between">
               {/* Score Circle */}
               <div className="flex flex-col items-center mb-8 md:mb-0">
-                <div className="relative h-48 w-48 rounded-full bg-white shadow-lg flex items-center justify-center border-8 border-blue-600">
+                <div className="relative h-48 w-48 rounded-full bg-card flex items-center justify-center border-8 border-primary">
                   <div className="text-center">
-                    <div className="text-6xl font-bold text-gray-900">{score}</div>
-                    <div className="text-gray-600 text-sm font-medium mt-1">out of 100</div>
+                    <div className="text-6xl font-medium text-foreground">{score}</div>
+                    <div className="text-muted-foreground text-sm font-medium mt-1">out of 100</div>
                   </div>
                 </div>
               </div>
@@ -64,25 +64,25 @@ function CredibilityPageContent() {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">Overall Progress</span>
-                      <span className="text-sm text-gray-600">{score}%</span>
+                      <span className="font-medium text-foreground">Overall Progress</span>
+                      <span className="text-sm text-muted-foreground">{score}%</span>
                     </div>
-                    <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-4 bg-secondary rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500"
+                        className="h-full bg-secondary rounded-full transition-colors duration-500"
                         style={{ width: `${score}%` }}
                       ></div>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t">
-                    <p className="text-gray-700 mb-3">
-                      <span className="font-semibold text-green-600">🎉 Excellent</span> - You're in the top 20% of contractors. Keep up the great work!
+                    <p className="text-foreground mb-3">
+                      <span className="font-medium text-success">Excellent</span> - You're in the top 20% of contractors. Keep up the great work!
                     </p>
                     <div className="flex gap-2 flex-wrap">
-                      <Badge className="bg-green-100 text-green-800">Verified</Badge>
-                      <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-                      <Badge className="bg-purple-100 text-purple-800">Trusted</Badge>
+                      <Badge className="bg-success/10 text-success">Verified</Badge>
+                      <Badge className="bg-secondary text-primary">Active</Badge>
+                      <Badge className="bg-secondary text-primary">Trusted</Badge>
                     </div>
                   </div>
                 </div>
@@ -93,22 +93,22 @@ function CredibilityPageContent() {
 
         {/* Metrics Grid */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Metrics</h2>
+          <h2 className="text-2xl font-medium text-foreground mb-4">Performance Metrics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {metrics.map((metric, idx) => (
-              <Card key={idx} className="border-0 hover:shadow-lg transition-shadow">
+              <Card key={idx} className="border-0 hover:border-foreground/25 transition-shadow">
                 <CardContent className="p-6">
                   <div className={`h-12 w-12 rounded-xl ${metric.bg} flex items-center justify-center mb-4`}>
                     <TrendingUp className={`h-6 w-6 ${metric.color}`} />
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{metric.label}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{metric.label}</p>
                   <div className="flex items-baseline gap-1">
-                    <span className={`text-3xl font-bold ${metric.color}`}>{metric.value}</span>
-                    <span className="text-gray-500">/ {metric.max}</span>
+                    <span className={`text-3xl font-medium ${metric.color}`}>{metric.value}</span>
+                    <span className="text-muted-foreground">/ {metric.max}</span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full mt-3 overflow-hidden">
+                  <div className="h-2 bg-secondary rounded-full mt-3 overflow-hidden">
                     <div
-                      className={`h-full transition-all ${metric.color.replace('text-', 'bg-')}`}
+                      className={`h-full transition-colors ${metric.color.replace('text-', 'bg-')}`}
                       style={{ width: `${(metric.value / metric.max) * 100}%` }}
                     ></div>
                   </div>
@@ -120,29 +120,29 @@ function CredibilityPageContent() {
 
         {/* Compliance Documents */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Compliance Documents</h2>
+          <h2 className="text-2xl font-medium text-foreground mb-4">Compliance Documents</h2>
           <div className="space-y-3">
             {documents.map((doc, idx) => (
-              <Card key={idx} className="border-0 hover:shadow-md transition-shadow">
+              <Card key={idx} className="border-0 hover:border-foreground/25 transition-shadow">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <FileText className="h-6 w-6 text-gray-400 flex-shrink-0" />
+                    <FileText className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-gray-900">{doc.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-foreground">{doc.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {doc.status === "verified" && `Verified on ${doc.uploadedDate}`}
                         {doc.status === "expiring" && `Expires on ${doc.expiryDate}`}
                       </p>
                     </div>
                   </div>
                   {doc.status === "verified" && (
-                    <Badge className="bg-green-100 text-green-800">
+                    <Badge className="bg-success/10 text-success">
                       <CheckCircle2 className="h-4 w-4 mr-1" />
                       Verified
                     </Badge>
                   )}
                   {doc.status === "expiring" && (
-                    <Badge className="bg-yellow-100 text-yellow-800">
+                    <Badge className="bg-warning/10 text-warning">
                       <AlertTriangle className="h-4 w-4 mr-1" />
                       Expiring Soon
                     </Badge>
@@ -161,7 +161,7 @@ function CredibilityPageContent() {
         <Card className="border-0 mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+              <TrendingUp className="h-5 w-5 text-success" />
               Tips to Improve Your Credibility
             </CardTitle>
             <CardDescription>Follow these recommendations to boost your score</CardDescription>
@@ -171,11 +171,11 @@ function CredibilityPageContent() {
               {tips.map((item, idx) => {
                 const Icon = item.icon;
                 return (
-                  <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-lg">
-                    <Icon className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+                  <div key={idx} className="flex gap-4 p-4 bg-secondary rounded-lg">
+                    <Icon className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                     <div>
-                      <p className="font-medium text-gray-900 mb-1">{item.text}</p>
-                      <p className="text-sm text-gray-600">{item.tip}</p>
+                      <p className="font-medium text-foreground mb-1">{item.text}</p>
+                      <p className="text-sm text-muted-foreground">{item.tip}</p>
                     </div>
                   </div>
                 );
@@ -199,13 +199,13 @@ function CredibilityPageContent() {
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between py-3 border-b last:border-b-0">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-gray-900">{item.event}</p>
-                      <p className="text-sm text-gray-600">{item.project} • {item.date}</p>
+                      <p className="font-medium text-foreground">{item.event}</p>
+                      <p className="text-sm text-muted-foreground">{item.project} • {item.date}</p>
                     </div>
                   </div>
-                  <span className="font-semibold text-green-600">{item.impact} pts</span>
+                  <span className="font-medium text-success">{item.impact} pts</span>
                 </div>
               ))}
             </div>

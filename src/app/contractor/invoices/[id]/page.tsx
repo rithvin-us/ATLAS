@@ -114,7 +114,7 @@ function InvoiceDetailContent() {
           <Link href="/contractor/invoices" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Invoice {invoice.id.slice(0, 8)}</h1>
+          <h1 className="text-2xl font-medium ml-4">Invoice {invoice.id.slice(0, 8)}</h1>
         </div>
       </header>
 
@@ -122,12 +122,12 @@ function InvoiceDetailContent() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Status Banner */}
           {invoice.paidAt && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="bg-success/10 border border-success/30 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <CheckCircle2 className="h-6 w-6 text-success" />
                 <div>
-                  <div className="font-semibold text-green-900">Payment Received</div>
-                  <div className="text-sm text-green-700">
+                  <div className="font-medium text-success">Payment Received</div>
+                  <div className="text-sm text-success">
                     Paid on {new Date(invoice.paidAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -193,26 +193,26 @@ function InvoiceDetailContent() {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-semibold mb-2">Description</h3>
+                  <h3 className="font-medium mb-2">Description</h3>
                   <p className="text-muted-foreground">{invoice.description}</p>
                 </div>
 
                 <div className="border-t pt-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="text-lg font-semibold">
+                    <span className="text-lg font-medium">
                       ${invoice.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Tax</span>
-                    <span className="text-lg font-semibold">
+                    <span className="text-lg font-medium">
                       ${invoice.taxAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="border-t pt-3 flex items-center justify-between">
-                    <span className="text-lg font-semibold">Total Amount</span>
-                    <span className="text-2xl font-bold text-green-600">
+                    <span className="text-lg font-medium">Total Amount</span>
+                    <span className="text-2xl font-medium text-success">
                       ${invoice.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -230,10 +230,10 @@ function InvoiceDetailContent() {
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="mt-1">
-                    <div className="h-2 w-2 rounded-full bg-blue-500" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-semibold">Invoice Created</div>
+                    <div className="font-medium">Invoice Created</div>
                     <div className="text-sm text-muted-foreground">
                       {new Date(invoice.createdAt).toLocaleString()}
                     </div>
@@ -243,10 +243,10 @@ function InvoiceDetailContent() {
                 {invoice.status !== 'draft' && (
                   <div className="flex items-start gap-3">
                     <div className="mt-1">
-                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      <div className="h-2 w-2 rounded-full bg-primary" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold">Invoice Submitted</div>
+                      <div className="font-medium">Invoice Submitted</div>
                       <div className="text-sm text-muted-foreground">
                         Awaiting approval from agent
                       </div>
@@ -257,10 +257,10 @@ function InvoiceDetailContent() {
                 {(invoice.status === 'approved' || invoice.status === 'paid') && (
                   <div className="flex items-start gap-3">
                     <div className="mt-1">
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <div className="h-2 w-2 rounded-full bg-success" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold">Invoice Approved</div>
+                      <div className="font-medium">Invoice Approved</div>
                       <div className="text-sm text-muted-foreground">
                         Approved for payment
                       </div>
@@ -271,10 +271,10 @@ function InvoiceDetailContent() {
                 {invoice.paidAt && (
                   <div className="flex items-start gap-3">
                     <div className="mt-1">
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <div className="h-2 w-2 rounded-full bg-success" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold">Payment Received</div>
+                      <div className="font-medium">Payment Received</div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(invoice.paidAt).toLocaleString()}
                       </div>

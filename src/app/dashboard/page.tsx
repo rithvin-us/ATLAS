@@ -10,15 +10,15 @@ export default function DashboardPage() {
       <div className="space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold font-headline tracking-tight">Contractor Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, here's your operational overview.</p>
+            <h1 className="text-3xl font-medium tracking-tight">Contractor Dashboard</h1>
+            <p className="text-muted-foreground">Operational overview</p>
           </div>
           <div className="flex items-center gap-4 p-4 border rounded-lg bg-card">
             <div className="text-right">
                 <p className="text-sm font-medium text-muted-foreground">Credibility Score</p>
-                <p className="text-2xl font-bold flex items-center gap-2 justify-end">
+                <p className="text-2xl font-medium flex items-center gap-2 justify-end">
                   88 
-                  <Award className="h-6 w-6 text-yellow-500" />
+                  <Award className="h-6 w-6 text-warning" />
                 </p>
             </div>
             <Button variant="outline" size="sm">View Details</Button>
@@ -32,7 +32,7 @@ export default function DashboardPage() {
               <Megaphone className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-medium">12</div>
               <p className="text-xs text-muted-foreground">+2 viewing since last hour</p>
             </CardContent>
           </Card>
@@ -42,7 +42,7 @@ export default function DashboardPage() {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
+              <div className="text-2xl font-medium">5</div>
               <p className="text-xs text-muted-foreground">1 milestone needs attention</p>
             </CardContent>
           </Card>
@@ -52,7 +52,7 @@ export default function DashboardPage() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">34</div>
+              <div className="text-2xl font-medium">34</div>
               <p className="text-xs text-muted-foreground">+3 this quarter</p>
             </CardContent>
           </Card>
@@ -62,7 +62,7 @@ export default function DashboardPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
+              <div className="text-2xl font-medium">3</div>
               <p className="text-xs text-muted-foreground">2 invoices, 1 RFQ response</p>
             </CardContent>
           </Card>
@@ -88,19 +88,19 @@ export default function DashboardPage() {
                   <TableRow>
                     <TableCell className="font-medium">Project Phoenix</TableCell>
                     <TableCell>$12,500.00</TableCell>
-                    <TableCell><Badge className="bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300" variant="outline">Overdue</Badge></TableCell>
+                    <TableCell><Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 dark:bg-destructive/30 dark:text-destructive/60" variant="outline">Overdue</Badge></TableCell>
                     <TableCell className="text-right"><Button variant="ghost" size="sm">View</Button></TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Site Upgrade Alpha</TableCell>
                     <TableCell>$8,200.00</TableCell>
-                    <TableCell><Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300" variant="outline">Pending</Badge></TableCell>
+                    <TableCell><Badge className="bg-warning/10 text-warning hover:bg-warning/20 dark:bg-warning/30 dark:text-warning/60" variant="outline">Pending</Badge></TableCell>
                     <TableCell className="text-right"><Button variant="ghost" size="sm">View</Button></TableCell>
                   </TableRow>
                    <TableRow>
                     <TableCell className="font-medium">HVAC Maintenance</TableCell>
                     <TableCell>$5,000.00</TableCell>
-                     <TableCell><Badge className="bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300" variant="outline">Paid</Badge></TableCell>
+                     <TableCell><Badge className="bg-success/10 text-success hover:bg-success/20 dark:bg-success/30 dark:text-success/60" variant="outline">Paid</Badge></TableCell>
                     <TableCell className="text-right"><Button variant="ghost" size="sm">View</Button></TableCell>
                   </TableRow>
                 </TableBody>
@@ -115,16 +115,16 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-6 flex-1">
               <div className="flex items-start gap-4">
-                <ShieldCheck className="h-6 w-6 text-green-500 flex-shrink-0" />
+                <ShieldCheck className="h-6 w-6 text-success flex-shrink-0" />
                 <div>
-                  <p className="font-semibold">ISO 9001:2015</p>
+                  <p className="font-medium">ISO 9001:2015</p>
                   <p className="text-sm text-muted-foreground">Verified on 2024-01-15</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <FileWarning className="h-6 w-6 text-yellow-500 flex-shrink-0" />
+                <FileWarning className="h-6 w-6 text-warning flex-shrink-0" />
                 <div>
-                  <p className="font-semibold">General Liability Insurance</p>
+                  <p className="font-medium">General Liability Insurance</p>
                   <p className="text-sm text-muted-foreground">Expires in 28 days</p>
                 </div>
               </div>
@@ -137,8 +137,8 @@ export default function DashboardPage() {
 
         <Card className="bg-primary/5 border-primary/20">
             <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                🚀 AI-Powered Quotation Analysis
+                <CardTitle className="flex items-center gap-2">
+                Quotation analysis
                 </CardTitle>
             </CardHeader>
             <CardContent>

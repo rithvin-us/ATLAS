@@ -24,7 +24,7 @@ export function AgentGuard({ children }: AgentGuardProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-3 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Checking access...</span>
+          <span>Checking access</span>
         </div>
       </div>
     );

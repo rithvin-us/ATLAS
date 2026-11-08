@@ -114,7 +114,7 @@ export default function CreateRFQPage() {
             <Link href="/agent/rfq" className="text-muted-foreground hover:text-foreground">
               ← RFQs
             </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Create RFQ</h1>
+            <h1 className="text-2xl font-medium ml-4">Create RFQ</h1>
           </div>
         </header>
 
@@ -166,7 +166,7 @@ export default function CreateRFQPage() {
                   <Textarea
                     id="description"
                     name="description"
-                    placeholder="Brief overview of the RFQ..."
+                    placeholder="Brief overview of the RFQ"
                     value={formData.description}
                     onChange={handleChange}
                     rows={3}
@@ -178,7 +178,7 @@ export default function CreateRFQPage() {
                   <Textarea
                     id="scopeOfWork"
                     name="scopeOfWork"
-                    placeholder="Detailed scope of work..."
+                    placeholder="Detailed scope of work"
                     value={formData.scopeOfWork}
                     onChange={handleChange}
                     rows={4}

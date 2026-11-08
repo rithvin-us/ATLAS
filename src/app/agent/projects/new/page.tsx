@@ -86,7 +86,7 @@ export default function CreateProjectPage() {
             <Link href="/agent/projects" className="text-muted-foreground hover:text-foreground">
               ← Projects
             </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Create Project</h1>
+            <h1 className="text-2xl font-medium ml-4">Create Project</h1>
           </div>
         </header>
 
@@ -149,7 +149,7 @@ export default function CreateProjectPage() {
                   <Textarea
                     id="description"
                     name="description"
-                    placeholder="Provide a detailed description of the project..."
+                    placeholder="Provide a detailed description of the project"
                     value={formData.description}
                     onChange={handleChange}
                     rows={4}

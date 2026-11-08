@@ -26,26 +26,26 @@ export function NotificationsPanel({ isOpen, onClose, notifications, userType }:
 
   const getIcon = (type: string) => {
     if (type === 'invoice_pending') {
-      return <DollarSign className="h-5 w-5 text-blue-600" />;
+      return <DollarSign className="h-5 w-5 text-primary" />;
     }
-    return <Gavel className="h-5 w-5 text-purple-600" />;
+    return <Gavel className="h-5 w-5 text-primary" />;
   };
 
   const getColor = (type: string) => {
-    if (type === 'invoice_pending') return 'bg-blue-50 border-l-blue-500';
-    if (type === 'bidding_ended') return 'bg-orange-50 border-l-orange-500';
-    return 'bg-purple-50 border-l-purple-500';
+    if (type === 'invoice_pending') return 'bg-secondary border-l-primary';
+    if (type === 'bidding_ended') return 'bg-warning/10 border-l-warning';
+    return 'bg-secondary border-l-primary';
   };
 
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed top-0 right-0 z-50 w-full max-w-md h-screen bg-white shadow-2xl overflow-hidden flex flex-col">
+      <div className="fixed top-0 right-0 z-50 w-full max-w-md h-screen bg-card overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-blue-600" />
-            <h2 className="font-semibold">Notifications</h2>
+            <Bell className="h-5 w-5 text-primary" />
+            <h2 className="font-medium">Notifications</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -55,7 +55,7 @@ export function NotificationsPanel({ isOpen, onClose, notifications, userType }:
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {notifications.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="flex items-center justify-center h-full text-muted-foreground">
               <p>No notifications</p>
             </div>
           ) : (
@@ -63,14 +63,14 @@ export function NotificationsPanel({ isOpen, onClose, notifications, userType }:
               {notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`p-4 border-l-4 ${getColor(notif.type)} hover:bg-gray-50`}
+                  className={`p-4 border-l-4 ${getColor(notif.type)} hover:bg-secondary`}
                 >
                   <div className="flex gap-3">
                     {getIcon(notif.type)}
                     <div className="flex-1">
-                      <h3 className="font-semibold text-sm">{notif.title}</h3>
-                      <p className="text-sm text-gray-700 mt-1">{notif.message}</p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <h3 className="font-medium text-sm">{notif.title}</h3>
+                      <p className="text-sm text-foreground mt-1">{notif.message}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
                         {formatTime(notif.timestamp)}
                       </p>
                     </div>

@@ -70,16 +70,16 @@ function StatusBadge({ status, expiryDate }: { status: string; expiryDate?: Date
   const isExpiring = expiryDate && new Date(expiryDate).getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000;
   const isExpired = expiryDate && new Date(expiryDate) < now;
 
-  let config = { label: 'Pending', color: 'bg-gray-100 text-gray-900', icon: Clock };
+  let config = { label: 'Pending', color: 'bg-secondary text-foreground', icon: Clock };
   
   if (isExpired) {
-    config = { label: 'Expired', color: 'bg-red-100 text-red-900', icon: AlertTriangle };
+    config = { label: 'Expired', color: 'bg-destructive/10 text-destructive', icon: AlertTriangle };
   } else if (status === 'verified' && isExpiring) {
-    config = { label: 'Expiring Soon', color: 'bg-yellow-100 text-yellow-900', icon: AlertTriangle };
+    config = { label: 'Expiring Soon', color: 'bg-warning/10 text-warning', icon: AlertTriangle };
   } else if (status === 'verified') {
-    config = { label: 'Verified', color: 'bg-green-100 text-green-900', icon: CheckCircle2 };
+    config = { label: 'Verified', color: 'bg-success/10 text-success', icon: CheckCircle2 };
   } else if (status === 'pending') {
-    config = { label: 'Pending Review', color: 'bg-blue-100 text-blue-900', icon: Clock };
+    config = { label: 'Pending Review', color: 'bg-secondary text-primary', icon: Clock };
   }
 
   const Icon = config.icon;
@@ -177,8 +177,8 @@ function UploadDialog({
           </div>
 
           {file && (
-            <div className="p-2 rounded-md bg-blue-50 border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">Selected: {file.name}</p>
+            <div className="p-2 rounded-md bg-secondary border border-border">
+              <p className="text-sm font-medium text-primary">Selected: {file.name}</p>
             </div>
           )}
 
@@ -262,7 +262,7 @@ function ComplianceContent() {
       const updated = await fetchContractorProfile(user.uid);
       setProfile(updated);
       
-      alert('Document uploaded successfully!');
+      alert('Document uploaded successfully');
     } catch (err) {
       console.error('Upload failed:', err);
       throw err;
@@ -331,7 +331,7 @@ function ComplianceContent() {
           <Link href="/contractor/dashboard" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Compliance Management</h1>
+          <h1 className="text-2xl font-medium ml-4">Compliance Management</h1>
         </div>
       </header>
 
@@ -347,7 +347,7 @@ function ComplianceContent() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-3xl font-bold">{complianceScore}%</div>
+                    <div className="text-3xl font-medium">{complianceScore}%</div>
                     <p className="text-sm text-muted-foreground">Complete</p>
                   </div>
                   <div className="relative h-16 w-16">
@@ -367,15 +367,15 @@ function ComplianceContent() {
                   </div>
                 </div>
                 {allRequiredUploaded ? (
-                  <div className="p-3 rounded-md bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-2 text-sm text-green-900">
+                  <div className="p-3 rounded-md bg-success/10 border border-success/30">
+                    <div className="flex items-center gap-2 text-sm text-success">
                       <CheckCircle2 className="h-4 w-4" />
                       All required documents submitted
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3 rounded-md bg-yellow-50 border border-yellow-200">
-                    <div className="flex items-center gap-2 text-sm text-yellow-900">
+                  <div className="p-3 rounded-md bg-warning/10 border border-warning/30">
+                    <div className="flex items-center gap-2 text-sm text-warning">
                       <AlertTriangle className="h-4 w-4" />
                       {missingDocs.length} document{missingDocs.length !== 1 ? 's' : ''} pending
                     </div>
@@ -414,7 +414,7 @@ function ComplianceContent() {
           {/* Document Checklist */}
           <div>
             <div className="mb-4">
-              <h2 className="text-lg font-semibold">Mandatory Documents</h2>
+              <h2 className="text-lg font-medium">Mandatory Documents</h2>
               <p className="text-sm text-muted-foreground">Upload and manage your compliance documentation</p>
             </div>
             <div className="space-y-3">
@@ -429,9 +429,9 @@ function ComplianceContent() {
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-primary" />
-                            <h3 className="font-semibold">{docType.name}</h3>
+                            <h3 className="font-medium">{docType.name}</h3>
                             {docType.required && (
-                              <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                              <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded">
                                 Required
                               </span>
                             )}
@@ -441,7 +441,7 @@ function ComplianceContent() {
                           {uploadedDoc && (
                             <div className="pt-2 space-y-2">
                               <div className="flex items-center gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                <CheckCircle2 className="h-4 w-4 text-success" />
                                 <span className="text-muted-foreground">
                                   Uploaded: {new Date(uploadedDoc.uploadedAt).toLocaleDateString()}
                                 </span>
@@ -492,29 +492,29 @@ function ComplianceContent() {
           </div>
 
           {/* Additional Info */}
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-secondary border-border">
             <CardContent className="pt-6">
               <div className="space-y-3">
-                <h3 className="font-semibold text-blue-900">Document Upload Guidelines</h3>
-                <ul className="text-sm text-blue-900 space-y-2">
+                <h3 className="font-medium text-primary">Document Upload Guidelines</h3>
+                <ul className="text-sm text-primary space-y-2">
                   <li className="flex gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
+                    <span className="text-primary font-medium">•</span>
                     <span>Upload clear, legible copies of original documents</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
+                    <span className="text-primary font-medium">•</span>
                     <span>Supported formats: PDF, DOC, DOCX, JPG, PNG</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
+                    <span className="text-primary font-medium">•</span>
                     <span>Maximum file size: 10MB per document</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
+                    <span className="text-primary font-medium">•</span>
                     <span>Expiry dates will trigger renewal reminders</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
+                    <span className="text-primary font-medium">•</span>
                     <span>Agents review documents for compliance verification</span>
                   </li>
                 </ul>

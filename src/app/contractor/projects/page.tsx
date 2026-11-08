@@ -171,10 +171,10 @@ function ProjectsContent() {
   }, [filteredProjects, selectedProject]);
 
   const statusTone = (status: Project['status']) => {
-    if (status === 'completed') return 'bg-green-100 text-green-800';
-    if (status === 'in-progress' || status === 'active') return 'bg-blue-100 text-blue-800';
-    if (status === 'closed') return 'bg-gray-100 text-gray-800';
-    return 'bg-amber-100 text-amber-800';
+    if (status === 'completed') return 'bg-success/10 text-success';
+    if (status === 'in-progress' || status === 'active') return 'bg-secondary text-primary';
+    if (status === 'closed') return 'bg-secondary text-foreground';
+    return 'bg-warning/10 text-warning';
   };
 
   const formatDate = (date?: Date) => (date ? new Date(date).toLocaleDateString() : '—');
@@ -212,7 +212,7 @@ function ProjectsContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -220,11 +220,11 @@ function ProjectsContent() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 flex gap-3">
-          <AlertCircle className="h-6 w-6 text-red-600" />
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6 flex gap-3">
+          <AlertCircle className="h-6 w-6 text-destructive" />
           <div>
-            <h3 className="font-semibold text-red-900">Unable to load projects</h3>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
+            <h3 className="font-medium text-destructive">Unable to load projects</h3>
+            <p className="text-sm text-destructive mt-1">{error}</p>
           </div>
         </div>
       </div>
@@ -232,12 +232,12 @@ function ProjectsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="text-gray-600 mt-2">Awarded and ongoing projects with milestones and contacts.</p>
+            <h1 className="text-3xl font-medium text-foreground">Projects</h1>
+            <p className="text-muted-foreground mt-2">Awarded and ongoing projects with milestones and contacts.</p>
           </div>
           <Badge variant="outline" className="text-sm">
             {projects.length} total projects
@@ -247,7 +247,7 @@ function ProjectsContent() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {toast && (
-          <div className="rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <div className="rounded-md border border-border bg-secondary px-4 py-3 text-sm text-primary">
             {toast}
           </div>
         )}
@@ -256,7 +256,7 @@ function ProjectsContent() {
           <CardContent className="p-6 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by code, name, or location"
                   className="pl-10"
@@ -284,9 +284,9 @@ function ProjectsContent() {
         {filteredProjects.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center space-y-3">
-              <Briefcase className="h-14 w-14 text-gray-300 mx-auto" />
-              <h3 className="text-lg font-semibold text-gray-900">No projects match your filters</h3>
-              <p className="text-sm text-gray-600">Try adjusting search keywords or status filters.</p>
+              <Briefcase className="h-14 w-14 text-muted-foreground/50 mx-auto" />
+              <h3 className="text-lg font-medium text-foreground">No projects match your filters</h3>
+              <p className="text-sm text-muted-foreground">Try adjusting search keywords or status filters.</p>
             </CardContent>
           </Card>
         ) : (
@@ -298,13 +298,13 @@ function ProjectsContent() {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="font-semibold">Project Code</TableHead>
-                      <TableHead className="font-semibold">Project</TableHead>
-                      <TableHead className="font-semibold">Client / Agent</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold">Start / End</TableHead>
-                      <TableHead className="font-semibold text-right">Actions</TableHead>
+                    <TableRow className="bg-secondary">
+                      <TableHead className="font-medium">Project Code</TableHead>
+                      <TableHead className="font-medium">Project</TableHead>
+                      <TableHead className="font-medium">Client / Agent</TableHead>
+                      <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium">Start / End</TableHead>
+                      <TableHead className="font-medium text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -315,17 +315,17 @@ function ProjectsContent() {
                       return (
                         <TableRow
                           key={project.id}
-                          className={`cursor-pointer ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                          className={`cursor-pointer ${isSelected ? 'bg-secondary' : 'hover:bg-secondary'}`}
                           onClick={() => setSelectedProject(project)}
                         >
-                          <TableCell className="font-mono text-sm text-blue-700">{project.id.slice(0, 8)}</TableCell>
+                          <TableCell className="font-mono text-sm text-primary">{project.id.slice(0, 8)}</TableCell>
                           <TableCell>
-                            <div className="text-gray-900 font-semibold">{project.name}</div>
-                            <div className="text-xs text-gray-500">{project.siteDetails.description?.slice(0, 60)}{project.siteDetails.description?.length > 60 ? '…' : ''}</div>
+                            <div className="text-foreground font-medium">{project.name}</div>
+                            <div className="text-xs text-muted-foreground">{project.siteDetails.description?.slice(0, 60)}{project.siteDetails.description?.length > 60 ? '…' : ''}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2 text-gray-700">
-                              <Building2 className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-foreground">
+                              <Building2 className="h-4 w-4 text-muted-foreground" />
                               {project.siteDetails.name || 'Agent organization'}
                             </div>
                           </TableCell>
@@ -333,8 +333,8 @@ function ProjectsContent() {
                             <Badge className={statusTone(project.status)}>{project.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-gray-800">{formatDate(start)}</div>
-                            <div className="text-xs text-gray-500">to {formatDate(end)}</div>
+                            <div className="text-sm text-foreground">{formatDate(start)}</div>
+                            <div className="text-xs text-muted-foreground">to {formatDate(end)}</div>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelectedProject(project)}>
@@ -355,15 +355,15 @@ function ProjectsContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {!selectedProject ? (
-                  <div className="text-sm text-gray-600">Select a project to view details.</div>
+                  <div className="text-sm text-muted-foreground">Select a project to view details.</div>
                 ) : (
                   <>
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-xs text-gray-500">Project Code</div>
-                        <div className="font-mono text-sm text-blue-700">{selectedProject.id}</div>
-                        <h3 className="text-lg font-semibold text-gray-900 mt-1">{selectedProject.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                        <div className="text-xs text-muted-foreground">Project Code</div>
+                        <div className="font-mono text-sm text-primary">{selectedProject.id}</div>
+                        <h3 className="text-lg font-medium text-foreground mt-1">{selectedProject.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
                           {selectedProject.siteDetails.description}
                         </p>
                       </div>
@@ -371,64 +371,64 @@ function ProjectsContent() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <MapPin className="h-4 w-4 text-gray-400" /> {selectedProject.siteDetails.location}
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <MapPin className="h-4 w-4 text-muted-foreground" /> {selectedProject.siteDetails.location}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Calendar className="h-4 w-4 text-gray-400" /> {formatDate(getStartEndDates(selectedProject).start)} — {formatDate(getStartEndDates(selectedProject).end)}
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <Calendar className="h-4 w-4 text-muted-foreground" /> {formatDate(getStartEndDates(selectedProject).start)} — {formatDate(getStartEndDates(selectedProject).end)}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Building2 className="h-4 w-4 text-gray-400" /> {selectedProject.siteDetails.name || 'Agent contact pending'}
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <Building2 className="h-4 w-4 text-muted-foreground" /> {selectedProject.siteDetails.name || 'Agent contact pending'}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium text-gray-900">{calcProgress(selectedProject)}%</span>
+                        <span className="text-muted-foreground">Progress</span>
+                        <span className="font-medium text-foreground">{calcProgress(selectedProject)}%</span>
                       </div>
                       <Progress value={calcProgress(selectedProject)} />
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {selectedProject.milestones?.filter((m) => m.status === 'completed').length ?? 0} of {selectedProject.milestones?.length ?? 0} milestones completed
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                        <ListChecks className="h-4 w-4 text-gray-500" /> Milestones
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <ListChecks className="h-4 w-4 text-muted-foreground" /> Milestones
                       </div>
                       {selectedProject.milestones && selectedProject.milestones.length > 0 ? (
                         <div className="space-y-2">
                           {selectedProject.milestones.slice(0, 4).map((milestone) => (
-                            <div key={milestone.id} className="rounded-lg border p-3 bg-gray-50">
-                              <div className="flex items-center justify-between text-sm font-medium text-gray-900">
+                            <div key={milestone.id} className="rounded-lg border p-3 bg-secondary">
+                              <div className="flex items-center justify-between text-sm font-medium text-foreground">
                                 {milestone.name}
                                 <Badge variant="outline" className="text-xs capitalize">{milestone.status}</Badge>
                               </div>
-                              <div className="text-xs text-gray-600 mt-1">Target: {formatDate((milestone as any).targetDate ?? milestone.dueDate)}</div>
+                              <div className="text-xs text-muted-foreground mt-1">Target: {formatDate((milestone as any).targetDate ?? milestone.dueDate)}</div>
                               {milestone.description && (
-                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">{milestone.description}</p>
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{milestone.description}</p>
                               )}
                             </div>
                           ))}
                           {selectedProject.milestones.length > 4 && (
-                            <p className="text-xs text-gray-500">+ more milestones in project detail</p>
+                            <p className="text-xs text-muted-foreground">+ more milestones in project detail</p>
                           )}
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-600">Milestones not provided.</p>
+                        <p className="text-sm text-muted-foreground">Milestones not provided.</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                        <ClipboardList className="h-4 w-4 text-gray-500" /> Deliverables
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <ClipboardList className="h-4 w-4 text-muted-foreground" /> Deliverables
                       </div>
-                      <p className="text-sm text-gray-600">Deliverables align with listed milestones and agreed acceptance criteria.</p>
+                      <p className="text-sm text-muted-foreground">Deliverables align with listed milestones and agreed acceptance criteria.</p>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-sm font-semibold text-gray-800">Progress update</div>
+                      <div className="text-sm font-medium text-foreground">Progress update</div>
                       <form className="space-y-2" onSubmit={handleProgressSubmit}>
                         <Textarea
                           placeholder="Share progress, blockers, or upcoming deliverables."

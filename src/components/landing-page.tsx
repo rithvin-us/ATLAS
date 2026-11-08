@@ -1,388 +1,215 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { ArrowRight, Check, FileText, Gavel, Receipt, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle, FileText, Search, Gavel, Receipt, Users, Briefcase, TrendingUp, ArrowRight, Target, Shield, Zap, Layers, Star, ArrowUpRight } from 'lucide-react';
 import { AtlasLogo } from '@/components/icons/logo';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { PipelineBar, money } from '@/components/dashboard-kit';
 
-const keyActions = [
-  { 
-    icon: FileText, 
-    title: 'Post Work', 
-    description: 'Create and publish RFQs to connect with qualified contractors.',
-    helper: 'Start by defining your project requirements and timeline',
+const features = [
+  {
+    icon: FileText,
+    title: 'Post work',
+    description: 'Publish RFQs with scope, budget and deadline, then compare quotations side by side.',
     link: '/auth/agent/signup',
-    gradient: 'from-blue-500 to-blue-600'
   },
-  { 
-    icon: Search, 
-    title: 'Browse RFQs', 
-    description: 'Discover opportunities that match your expertise and capacity.',
-    helper: 'Filter by industry, location, and project type',
+  {
+    icon: Search,
+    title: 'Find work',
+    description: 'Contractors see RFQs ranked by skills, budget, location and experience.',
     link: '/auth/contractor/signup',
-    gradient: 'from-emerald-500 to-emerald-600'
   },
-  { 
-    icon: Gavel, 
-    title: 'View Auctions', 
-    description: 'Participate in competitive bidding to secure the best talent.',
-    helper: 'Real-time auction management with transparent pricing',
+  {
+    icon: Gavel,
+    title: 'Run auctions',
+    description: 'Open live bidding on a project and watch the bid history as it builds.',
     link: '/auth/agent/signup',
-    gradient: 'from-purple-500 to-purple-600'
   },
-  { 
-    icon: Receipt, 
-    title: 'Track Invoices', 
-    description: 'Manage project milestones and automate payment workflows.',
-    helper: 'Milestone-based payments with built-in verification',
+  {
+    icon: Receipt,
+    title: 'Pay by milestone',
+    description: 'Contractors invoice against verified milestones. Agents approve and pay.',
     link: '/auth/contractor/signup',
-    gradient: 'from-amber-500 to-amber-600'
   },
 ];
 
-export function LandingPage() {
-  const agentImage = PlaceHolderImages.find((img) => img.id === 'agent-dashboard');
-  const contractorImage = PlaceHolderImages.find((img) => img.id === 'contractor-dashboard');
+const applicants = [
+  { name: 'Northline Electrical', bid: 48210, fit: 91 },
+  { name: 'Harbor Mechanical', bid: 52900, fit: 84 },
+  { name: 'Ridgeway Civil', bid: 46750, fit: 77 },
+];
 
+const agentPoints = [
+  'Create and publish detailed RFQs',
+  'Run competitive auctions for vendor selection',
+  'Rank applicants by a weighted fit score',
+  'Approve milestones and manage payments',
+];
+
+const contractorPoints = [
+  'Browse RFQs matched to your skills',
+  'Check quotations with AI before you submit',
+  'Build a credibility score',
+  'Track progress and invoice by milestone',
+];
+
+const navLink =
+  'text-sm text-muted-foreground transition-colors hover:text-foreground';
+
+export function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
-      {/* Header - Modern Glassmorphism */}
-      <header className="px-6 lg:px-8 h-20 flex items-center bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/50">
-        <Link href="#" className="flex items-center justify-center gap-3 flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
-            <AtlasLogo className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold font-headline text-slate-900">ATLAS</span>
-        </Link>
-        <div className="ml-auto flex items-center gap-8">
-          <nav className="hidden lg:flex gap-8">
-            <Link href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-200">
-              Features
-            </Link>
-            <Link href="#roles" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-200">
-              For Agents
-            </Link>
-            <Link href="#roles" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-200">
-              For Contractors
-            </Link>
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-0 z-50 border-b bg-background">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center px-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <AtlasLogo className="h-5 w-5 text-primary" />
+            <span className="text-base font-medium tracking-tight">ATLAS</span>
+          </Link>
+          <nav className="ml-12 hidden gap-8 md:flex" aria-label="Main">
+            <Link href="#features" className={navLink}>Features</Link>
+            <Link href="#roles" className={navLink}>For agents</Link>
+            <Link href="#roles" className={navLink}>For contractors</Link>
           </nav>
-          <div className="flex items-center gap-4">
-              <Link href="#roles" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors duration-200">
-                  Log In
-              </Link>
-              <Button asChild className="bg-slate-900 text-white hover:bg-slate-800 rounded-full px-6 text-sm font-medium shadow-lg shadow-slate-900/20">
-                  <Link href="#roles">Get Started</Link>
-              </Button>
+          <div className="ml-auto flex items-center gap-5">
+            <Link href="#roles" className={navLink}>Log in</Link>
+            <Button asChild size="sm">
+              <Link href="#roles">Get started</Link>
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero Section - Bold & Modern */}
-        <section className="w-full py-24 md:py-32 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
-          
-          <div className="container max-w-6xl mx-auto px-6 relative">
-            <div className="text-center space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-sm text-slate-300 font-medium">Procurement Operations Platform</span>
-              </div>
-              
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
-                Streamline Your<br />
-                <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400 bg-clip-text text-transparent">Workforce Operations</span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                A unified platform connecting buyers and contractors for efficient project sourcing, management, and execution.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <Button asChild size="lg" className="bg-white text-slate-900 hover:bg-slate-100 px-8 py-6 text-base rounded-full shadow-xl shadow-white/10">
-                  <Link href="#roles">Get Started <ArrowRight className="ml-2 h-5 w-5" /></Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="border-slate-600 text-black hover:bg-white/10 px-8 py-6 text-base rounded-full">
-                  <Link href="#features">Learn More</Link>
-                </Button>
-              </div>
+        <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-6 py-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:py-28">
+          <div>
+            <h1 className="text-4xl font-medium leading-[1.1] tracking-tight md:text-5xl">
+              Procurement for agents and contractors, from RFQ to payment
+            </h1>
+            <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
+              Publish RFQs and auctions, rank applicants, approve milestones and pay invoices in one workspace.
+            </p>
+            <div className="mt-8 flex items-center gap-3">
+              <Button asChild size="lg">
+                <Link href="#roles">
+                  Get started
+                  <ArrowRight className="ml-2 h-4 w-4" strokeWidth={1.5} />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="#features">See features</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="surface overflow-hidden" aria-label="Product preview">
+            <div className="flex items-center justify-between border-b px-5 py-3">
+              <span className="text-sm font-medium">Ranked applicants</span>
+              <span className="font-mono text-xs text-muted-foreground">RFQ-0412</span>
+            </div>
+            <ul className="divide-y">
+              {applicants.map((a, i) => (
+                <li key={a.name} className="flex items-center gap-4 px-5 py-3.5">
+                  <span className="w-4 font-mono text-sm text-muted-foreground tabular-nums">{i + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{a.name}</p>
+                    <p className="font-mono text-xs text-muted-foreground tabular-nums">{money(a.bid)}</p>
+                  </div>
+                  <div className="h-0.5 w-24 rounded-full bg-secondary">
+                    <div className="h-full rounded-full bg-foreground/60" style={{ width: `${a.fit}%` }} />
+                  </div>
+                  <span className={`w-8 text-right text-lg font-medium tabular-nums ${i === 0 ? 'text-primary' : ''}`}>
+                    {a.fit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="border-t bg-secondary/50 px-5 py-5">
+              <PipelineBar
+                segments={[
+                  { label: 'Pending approval', amount: 18400, count: 3, className: 'bg-chart-1' },
+                  { label: 'Approved', amount: 12600, count: 2, className: 'bg-chart-2' },
+                  { label: 'Paid', amount: 41200, count: 6, className: 'bg-chart-3' },
+                ]}
+              />
             </div>
           </div>
         </section>
 
-        {/* Key Actions Section - Card Grid with Hover Effects */}
-        <section className="w-full py-20 md:py-28 bg-white">
-          <div className="container max-w-6xl mx-auto px-6">
-            <div className="text-center mb-16 space-y-4">
-              <span className="inline-block px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-sm font-medium">
-                Core Features
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-                Everything You Need
-              </h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                Centralize your operations with purpose-built tools for modern workforce management.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {keyActions.map((action, index) => (
-                <Link key={index} href={action.link}>
-                  <div className="group h-full bg-slate-50 border-2 border-slate-100 rounded-3xl p-8 hover:bg-white hover:border-slate-200 hover:shadow-2xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                      <action.icon className="h-7 w-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">
-                      {action.title}
-                    </h3>
-                    <p className="text-slate-600 mb-4 leading-relaxed">
-                      {action.description}
-                    </p>
-                    <div className="flex items-center text-sm font-medium text-slate-400 group-hover:text-blue-600 transition-colors">
-                      <span>Learn more</span>
-                      <ArrowUpRight className="ml-1 h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                    </div>
-                  </div>
+        <section id="features" className="border-t">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
+            <h2 className="text-3xl font-medium tracking-tight">Everything between RFQ and payment</h2>
+            <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {features.map((f) => (
+                <Link key={f.title} href={f.link} className="surface-link block p-6">
+                  <f.icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+                  <h3 className="mt-6 text-base font-medium">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.description}</p>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Value Propositions - Dark Section with Asymmetric Layout */}
-        <section id="features" className="w-full py-20 md:py-28 bg-slate-900">
-          <div className="container max-w-6xl mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <span className="inline-block px-4 py-1.5 bg-white/10 text-slate-300 rounded-full text-sm font-medium mb-6">
-                  Enterprise Ready
-                </span>
-                <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-6">
-                  Built for Scale
-                </h2>
-                <p className="text-lg text-slate-400 mb-8 leading-relaxed">
-                  Trusted by organizations to manage complex procurement workflows with transparency and efficiency.
-                </p>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <Shield className="h-6 w-6 text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Role-Based Access</h3>
-                      <p className="text-slate-400">
-                        Secure authentication and permissions for buyers, contractors, and administrators.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                      <Layers className="h-6 w-6 text-emerald-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Project Management</h3>
-                      <p className="text-slate-400">
-                        Track milestones, approvals, and deliverables from initiation to completion.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="h-6 w-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Analytics & Insights</h3>
-                      <p className="text-slate-400">
-                        Real-time visibility into vendor performance, spend, and project health.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        <section className="border-t bg-card">
+          <div className="mx-auto grid max-w-[1200px] gap-12 px-6 py-20 lg:grid-cols-3">
+            {[
+              ['Role-based access', 'Agents and contractors sign in to separate workspaces and see only their own workflow.'],
+              ['Milestones and escrow', 'Track each milestone from pending to verified to invoiced, with escrow state per project.'],
+              ['Credibility', 'Every contractor carries a score built from delivery, compliance and past performance.'],
+            ].map(([t, d]) => (
+              <div key={t}>
+                <h3 className="text-base font-medium">{t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{d}</p>
               </div>
-              
-              {/* Visual Element */}
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-emerald-500/20 to-purple-500/20 rounded-3xl blur-2xl"></div>
-                <div className="relative bg-slate-800 border border-slate-700 rounded-3xl p-8">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-2xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium">Active RFQs</p>
-                          <p className="text-xs text-slate-400">12 awaiting response</p>
-                        </div>
-                      </div>
-                      <span className="text-2xl font-bold text-blue-400">12</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-2xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                          <Briefcase className="h-5 w-5 text-emerald-400" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium">Projects</p>
-                          <p className="text-xs text-slate-400">5 in progress</p>
-                        </div>
-                      </div>
-                      <span className="text-2xl font-bold text-emerald-400">5</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-2xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                          <Star className="h-5 w-5 text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium">Credibility Score</p>
-                          <p className="text-xs text-slate-400">Top 10% performer</p>
-                        </div>
-                      </div>
-                      <span className="text-2xl font-bold text-amber-400">92</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Role-based CTA Section - Split Design */}
-        <section id="roles" className="w-full py-20 md:py-28 bg-slate-50">
-          <div className="container max-w-6xl mx-auto px-6">
-            <div className="text-center mb-16 space-y-4">
-              <span className="inline-block px-4 py-1.5 bg-slate-200 text-slate-600 rounded-full text-sm font-medium">
-                Get Started
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-                Choose Your Path
-              </h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                Get started with the tools designed for your role in the workforce ecosystem.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Agent/Buyer Card - Dark Theme */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 lg:p-10 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6">
-                    <Target className="h-7 w-7 text-blue-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-3">
-                    For Buyers & Agents
-                  </h3>
-                  <p className="text-slate-400 mb-8">
-                    Source talent, manage RFQs, and oversee project execution with confidence.
-                  </p>
-                  
-                  <ul className="space-y-4 mb-8">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Create and publish detailed RFQs</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Run competitive auctions for vendor selection</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Evaluate vendors with AI-powered scoring</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-300">Approve milestones and manage payments</span>
-                    </li>
+        <section id="roles" className="border-t">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
+            <h2 className="text-3xl font-medium tracking-tight">Choose your workspace</h2>
+            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+              {[
+                { role: 'Agents', sub: 'Source vendors, manage RFQs and oversee delivery.', points: agentPoints, login: '/auth/agent/login', signup: '/auth/agent/signup', cta: 'Agent log in' },
+                { role: 'Contractors', sub: 'Find opportunities, submit bids and deliver projects.', points: contractorPoints, login: '/auth/contractor/login', signup: '/auth/contractor/signup', cta: 'Contractor log in' },
+              ].map((r) => (
+                <div key={r.role} className="surface p-8">
+                  <h3 className="text-xl font-medium">{r.role}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{r.sub}</p>
+                  <ul className="mt-6 space-y-3">
+                    {r.points.map((p) => (
+                      <li key={p} className="flex items-start gap-3 text-sm">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
+                        {p}
+                      </li>
+                    ))}
                   </ul>
-                  
-                  <div className="flex gap-3">
-                    <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-500 rounded-full">
-                      <Link href="/auth/agent/login">Agent Login</Link>
+                  <div className="mt-8 flex gap-3">
+                    <Button asChild className="flex-1">
+                      <Link href={r.login}>{r.cta}</Link>
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 border-slate-600 text-black hover:bg-white/10 rounded-full">
-                      <Link href="/auth/agent/signup">Sign Up</Link>
+                    <Button asChild variant="outline" className="flex-1">
+                      <Link href={r.signup}>Sign up</Link>
                     </Button>
                   </div>
                 </div>
-              </div>
-
-              {/* Contractor/Vendor Card - Light Theme */}
-              <div className="bg-white border-2 border-slate-200 rounded-3xl p-8 lg:p-10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-6">
-                    <Zap className="h-7 w-7 text-emerald-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3">
-                    For Contractors & Vendors
-                  </h3>
-                  <p className="text-slate-500 mb-8">
-                    Discover opportunities, submit bids, and deliver projects seamlessly.
-                  </p>
-                  
-                  <ul className="space-y-4 mb-8">
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-600">Browse and filter relevant RFQs</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-600">Submit AI-validated quotations</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-600">Build your credibility score</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-600">Track progress and handle invoicing</span>
-                    </li>
-                  </ul>
-                  
-                  <div className="flex gap-3">
-                    <Button asChild className="flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-full">
-                      <Link href="/auth/contractor/login">Contractor Login</Link>
-                    </Button>
-                    <Button asChild variant="outline" className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white rounded-full">
-                      <Link href="/auth/contractor/signup">Sign Up</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
-
       </main>
-      
-      <footer className="bg-slate-900 border-t border-slate-800 py-12">
-        <div className="container max-w-6xl mx-auto px-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
-                <AtlasLogo className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-white">ATLAS</span>
-            </div>
-            <p className="text-sm text-slate-400">&copy; 2024 ATLAS. All rights reserved.</p>
-            <nav className="flex gap-6">
-              <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">
-                Terms
-              </Link>
-              <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">
-                Privacy
-              </Link>
-            </nav>
+
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+          <div className="flex items-center gap-2.5">
+            <AtlasLogo className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">ATLAS</span>
           </div>
+          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} ATLAS</p>
+          <nav className="flex gap-6">
+            <Link href="#" className={navLink}>Terms</Link>
+            <Link href="#" className={navLink}>Privacy</Link>
+          </nav>
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -132,7 +132,7 @@ export default function ContractorProfile() {
   const getVerificationBadge = (status?: string) => {
     switch (status) {
       case 'verified':
-        return <Badge className="bg-green-500">Verified</Badge>;
+        return <Badge className="bg-success">Verified</Badge>;
       case 'pending':
         return <Badge variant="secondary">Pending</Badge>;
       case 'rejected':
@@ -170,7 +170,7 @@ export default function ContractorProfile() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">My Profile</h1>
+            <h1 className="text-3xl font-medium">My Profile</h1>
             <p className="text-muted-foreground">View and manage your contractor profile</p>
           </div>
           {!editing ? (
@@ -182,7 +182,7 @@ export default function ContractorProfile() {
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={saving}>
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? 'Saving' : 'Save'}
               </Button>
               <Button onClick={handleCancel} variant="outline" disabled={saving}>
                 <X className="h-4 w-4 mr-2" />
@@ -349,10 +349,10 @@ export default function ContractorProfile() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold">{credibility.score.toFixed(1)}</p>
+                  <p className="text-4xl font-medium">{credibility.score.toFixed(1)}</p>
                   <p className="text-sm text-muted-foreground">Out of 100</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-green-500" />
+                <TrendingUp className="h-8 w-8 text-success" />
               </div>
 
               <div className="space-y-3">
@@ -405,11 +405,11 @@ export default function ContractorProfile() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Projects Completed</p>
-                <p className="text-3xl font-bold">{stats.projectsCompleted}</p>
+                <p className="text-3xl font-medium">{stats.projectsCompleted}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Active Projects</p>
-                <p className="text-3xl font-bold">{stats.activeProjects}</p>
+                <p className="text-3xl font-medium">{stats.activeProjects}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Verification Status</p>

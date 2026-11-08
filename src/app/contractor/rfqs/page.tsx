@@ -125,7 +125,7 @@ function RFQsContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -133,12 +133,12 @@ function RFQsContent() {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6">
           <div className="flex gap-4">
-            <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-red-900">Error Loading RFQs</h3>
-              <p className="text-red-700 text-sm mt-1">{error}</p>
+              <h3 className="font-medium text-destructive">Error Loading RFQs</h3>
+              <p className="text-destructive text-sm mt-1">{error}</p>
             </div>
           </div>
         </div>
@@ -147,14 +147,14 @@ function RFQsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Page Header */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Browse RFQs</h1>
-              <p className="text-gray-600 mt-2">View and respond to open Request for Quotations</p>
+              <h1 className="text-3xl font-medium text-foreground">Browse RFQs</h1>
+              <p className="text-muted-foreground mt-2">View and respond to open Request for Quotations</p>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-sm">
@@ -174,9 +174,9 @@ function RFQsContent() {
               {/* Search Bar */}
               <div className="flex gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by RFQ ID, project name, or description..."
+                    placeholder="Search by RFQ ID, project name, or description"
                     className="pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -202,7 +202,7 @@ function RFQsContent() {
               {showFilters && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Status</label>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="All Status" />
@@ -216,7 +216,7 @@ function RFQsContent() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Industry</label>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Industry</label>
                     <Select value={industryFilter} onValueChange={setIndustryFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="All Industries" />
@@ -231,7 +231,7 @@ function RFQsContent() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Location</label>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Location</label>
                     <Select value={locationFilter} onValueChange={setLocationFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="All Locations" />
@@ -246,7 +246,7 @@ function RFQsContent() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Budget Range</label>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Budget Range</label>
                     <Select value={budgetFilter} onValueChange={setBudgetFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="All Budgets" />
@@ -269,9 +269,9 @@ function RFQsContent() {
         {filteredRfqs.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No RFQs found</h3>
-              <p className="text-gray-600 max-w-md">
+              <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No RFQs found</h3>
+              <p className="text-muted-foreground max-w-md">
                 {searchQuery || statusFilter !== 'all'
                   ? 'No RFQs match your search criteria. Try adjusting your filters.'
                   : 'There are no RFQs available at the moment. Check back later for new opportunities.'}
@@ -282,14 +282,14 @@ function RFQsContent() {
           <Card>
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="font-semibold">RFQ ID</TableHead>
-                  <TableHead className="font-semibold">Project Name</TableHead>
-                  <TableHead className="font-semibold">Buyer Organization</TableHead>
-                  <TableHead className="font-semibold">Budget Range</TableHead>
-                  <TableHead className="font-semibold">Closing Date</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold text-right">Actions</TableHead>
+                <TableRow className="bg-secondary">
+                  <TableHead className="font-medium">RFQ ID</TableHead>
+                  <TableHead className="font-medium">Project Name</TableHead>
+                  <TableHead className="font-medium">Buyer Organization</TableHead>
+                  <TableHead className="font-medium">Budget Range</TableHead>
+                  <TableHead className="font-medium">Closing Date</TableHead>
+                  <TableHead className="font-medium">Status</TableHead>
+                  <TableHead className="font-medium text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -297,48 +297,48 @@ function RFQsContent() {
                   const daysUntilDeadline = Math.ceil((new Date(rfq.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                   const isUrgent = daysUntilDeadline <= 3 && daysUntilDeadline > 0;
                   const isExpired = daysUntilDeadline < 0;
-                  const statusColor = rfq.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                  const statusColor = rfq.status === 'published' ? 'bg-success/10 text-success' : 'bg-secondary text-foreground';
 
                   return (
-                    <TableRow key={rfq.id} className="hover:bg-gray-50">
+                    <TableRow key={rfq.id} className="hover:bg-secondary">
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-gray-400" />
-                          <span className="text-blue-600">{rfq.id.slice(0, 8)}</span>
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-primary">{rfq.id.slice(0, 8)}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-medium text-gray-900">{rfq.title}</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="font-medium text-foreground">{rfq.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
                             {rfq.description?.substring(0, 60)}...
                           </p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Building className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-700">Agent Company</span>
+                          <Building className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground">Agent Company</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-700">$50K - $150K</span>
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground">$50K - $150K</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
                           <div>
-                            <p className="text-gray-700">{new Date(rfq.deadline).toLocaleDateString()}</p>
+                            <p className="text-foreground">{new Date(rfq.deadline).toLocaleDateString()}</p>
                             {isUrgent && (
-                              <p className="text-xs text-red-600 font-medium">
+                              <p className="text-xs text-destructive font-medium">
                                 {daysUntilDeadline} days left
                               </p>
                             )}
                             {isExpired && (
-                              <p className="text-xs text-gray-500">Expired</p>
+                              <p className="text-xs text-muted-foreground">Expired</p>
                             )}
                           </div>
                         </div>
@@ -377,7 +377,7 @@ function RFQsContent() {
 
             {pageCount > 1 && (
               <div className="flex items-center justify-between px-6 py-4 border-t">
-                <p className="text-sm text-gray-600">Page {currentPage} of {pageCount}</p>
+                <p className="text-sm text-muted-foreground">Page {currentPage} of {pageCount}</p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"

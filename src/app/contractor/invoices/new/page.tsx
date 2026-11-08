@@ -322,13 +322,13 @@ function CreateInvoiceContent() {
             <Link href="/contractor/invoices" className="text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-2xl font-bold font-headline ml-4">Create Invoice</h1>
+            <h1 className="text-2xl font-medium ml-4">Create Invoice</h1>
           </div>
         </header>
         <main className="flex-1 container py-6 px-4">
           <div className="text-center max-w-md mx-auto">
             <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Active Projects</h3>
+            <h3 className="text-lg font-medium mb-2">No Active Projects</h3>
             <p className="text-muted-foreground mb-4">
               You need to have active projects with approved milestones to create invoices.
             </p>
@@ -348,7 +348,7 @@ function CreateInvoiceContent() {
           <Link href="/contractor/invoices" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold font-headline ml-4">Create Invoice</h1>
+          <h1 className="text-2xl font-medium ml-4">Create Invoice</h1>
         </div>
       </header>
 
@@ -461,7 +461,7 @@ function CreateInvoiceContent() {
                     <Label>Total (auto-calculated)</Label>
                     <div className="p-3 rounded-md bg-muted flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Amount + Tax</span>
-                      <span className="text-xl font-semibold">${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-xl font-medium">${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 </div>
@@ -558,17 +558,17 @@ function CreateInvoiceContent() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <CheckCircle2 className="h-4 w-4 text-success" />
                       Drafts save without notifying the agent.
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <CheckCircle2 className="h-4 w-4 text-success" />
                       Submission notifies the agent and locks milestone selection.
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
                     <Button type="button" variant="outline" disabled={submitting} onClick={(e) => handleSubmit(e, 'draft')}>
-                      {submitting ? 'Saving draft...' : 'Save Draft'}
+                      {submitting ? 'Saving draft' : 'Save Draft'}
                     </Button>
                     <Button type="submit" disabled={submitting || !acknowledged} className="w-full">
                       {submitting ? (
